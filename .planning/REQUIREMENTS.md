@@ -1,7 +1,7 @@
 # Requirements: pyproject-fmt
 
 **Defined:** 2026-02-09
-**Core Value:** Running `pyproject_fmt` on any `pyproject.toml` produces a consistently sorted and formatted file — deterministic output regardless of input ordering.
+**Core Value:** Running `pyproject_fmt` on any `pyproject.toml` produces a consistently sorted and formatted file -- deterministic output regardless of input ordering.
 
 ## v1 Requirements
 
@@ -30,6 +30,15 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **FMT-02**: taplo reorder_keys is disabled (preserves toml-sort's ordering)
 - [ ] **FMT-03**: Inline arrays are used where configured by overrides
 - [ ] **FMT-04**: Trailing commas added to multi-line inline arrays
+
+### Testing
+
+- [ ] **TEST-01**: A real pyproject.toml golden file exists as a first-class test artifact -- already correctly formatted, representing the expected output state
+- [ ] **TEST-02**: Tests compare pipeline output against the golden file to detect unformatted areas (any diff between output and expected = test failure)
+- [ ] **TEST-03**: Tests detect data loss by verifying every key, value, table, and comment present in input survives the pipeline (nothing dropped)
+- [ ] **TEST-04**: Tests verify the exact table and key ordering in output matches the golden file (order fidelity)
+- [ ] **TEST-05**: Tests verify every comment in the input appears at its correct position in the output (comment fidelity)
+- [ ] **TEST-06**: The golden file is the single source of truth -- pipeline is correct when output == golden file, byte-for-byte
 
 ### CLI
 
@@ -76,44 +85,50 @@ Deferred to future release. Tracked but not in current roadmap.
 | Poetry-specific handling | Generic tool section treatment is sufficient |
 | Automatic version bumping | Release management is a different concern |
 | TOML 1.1 features | Not yet finalized; support TOML 1.0 only |
-| Dozens of CLI flags | Opinionated tool — hardcode one correct behavior |
+| Dozens of CLI flags | Opinionated tool -- hardcode one correct behavior |
 | Comment removal options | Always preserve all comments |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PIPE-01 | TBD | Pending |
-| PIPE-02 | TBD | Pending |
-| PIPE-03 | TBD | Pending |
-| PIPE-04 | TBD | Pending |
-| PIPE-05 | TBD | Pending |
-| SORT-01 | TBD | Pending |
-| SORT-02 | TBD | Pending |
-| SORT-03 | TBD | Pending |
-| SORT-04 | TBD | Pending |
-| SORT-05 | TBD | Pending |
-| SORT-06 | TBD | Pending |
-| FMT-01 | TBD | Pending |
-| FMT-02 | TBD | Pending |
-| FMT-03 | TBD | Pending |
-| FMT-04 | TBD | Pending |
-| CLI-01 | TBD | Pending |
-| CLI-02 | TBD | Pending |
-| CLI-03 | TBD | Pending |
-| CLI-04 | TBD | Pending |
-| CLI-05 | TBD | Pending |
-| CONF-01 | TBD | Pending |
-| CONF-02 | TBD | Pending |
-| CONF-03 | TBD | Pending |
-| INTG-01 | TBD | Pending |
-| INTG-02 | TBD | Pending |
+| PIPE-01 | Phase 1 | Pending |
+| PIPE-02 | Phase 1 | Pending |
+| PIPE-03 | Phase 1 | Pending |
+| PIPE-04 | Phase 1 | Pending |
+| PIPE-05 | Phase 1 | Pending |
+| SORT-01 | Phase 1 | Pending |
+| SORT-02 | Phase 1 | Pending |
+| SORT-03 | Phase 1 | Pending |
+| SORT-04 | Phase 1 | Pending |
+| SORT-05 | Phase 1 | Pending |
+| SORT-06 | Phase 1 | Pending |
+| FMT-01 | Phase 1 | Pending |
+| FMT-02 | Phase 1 | Pending |
+| FMT-03 | Phase 1 | Pending |
+| FMT-04 | Phase 1 | Pending |
+| TEST-01 | Phase 1 | Pending |
+| TEST-02 | Phase 1 | Pending |
+| TEST-03 | Phase 1 | Pending |
+| TEST-04 | Phase 1 | Pending |
+| TEST-05 | Phase 1 | Pending |
+| TEST-06 | Phase 1 | Pending |
+| CLI-01 | Phase 2 | Pending |
+| CLI-02 | Phase 2 | Pending |
+| CLI-03 | Phase 2 | Pending |
+| CLI-04 | Phase 2 | Pending |
+| CLI-05 | Phase 2 | Pending |
+| CONF-02 | Phase 2 | Pending |
+| CONF-03 | Phase 2 | Pending |
+| INTG-01 | Phase 3 | Pending |
+| INTG-02 | Phase 3 | Pending |
+| CONF-01 | Phase 1 | Pending |
 
 **Coverage:**
-- v1 requirements: 25 total
-- Mapped to phases: 0
-- Unmapped: 25 (pending roadmap creation)
+- v1 requirements: 31 total
+- Mapped to phases: 31
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-09*
-*Last updated: 2026-02-09 after initial definition*
+*Last updated: 2026-02-09 after roadmap revision (testing requirements added)*
