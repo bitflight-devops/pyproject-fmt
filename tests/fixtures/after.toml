@@ -403,4 +403,5 @@ inline_arrays = false
 inline_arrays = true
 
 [tool.tomlsort.overrides."tool.ty.*"]
+
 inline_arrays = true
