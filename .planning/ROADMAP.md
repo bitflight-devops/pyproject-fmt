@@ -29,12 +29,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. Tests structurally verify that every key, value, table, and comment present in the input survives the pipeline -- any data loss (dropped keys, values, tables, or comments) is a test failure
   5. Tests verify the exact table ordering (project, build-system, dependency-groups, tool.*) and key ordering ([project] semantic order, [build-system] requires/build-backend first, alphabetical elsewhere) in the output matches the golden file
   6. Tests verify every comment in the input appears at its correct position in the output -- header, footer, inline, and block comments all have fidelity checks
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 01-01: Golden file creation and pipeline foundation
-- [ ] 01-02: Sorting logic and taplo formatting integration
-- [ ] 01-03: Golden file comparison tests, data loss detection, and comment/order fidelity verification
+- [ ] 01-01-PLAN.md -- Pipeline foundation: config, sorter, formatter, pipeline modules + golden file regeneration
+- [ ] 01-02-PLAN.md -- Test suite: golden file comparison, data loss detection, ordering verification, comment fidelity
 
 ### Phase 2: CLI and Configuration
 **Goal**: Users can run `pyproject_fmt` from the command line to sort and format pyproject.toml files, with check/diff modes for CI and user-configurable overrides via `[tool.pyproject-fmt]`.
@@ -70,6 +69,6 @@ Phases execute in numeric order: 1 -> 2 -> 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Core Pipeline | 0/3 | Not started | - |
+| 1. Core Pipeline | 0/2 | Not started | - |
 | 2. CLI and Configuration | 0/2 | Not started | - |
 | 3. Integration | 0/1 | Not started | - |
