@@ -44,11 +44,11 @@ Plans:
   2. User can run `pyproject_fmt --check pyproject.toml` and get exit code 0 (no changes needed) or non-zero (changes needed) without modifying the file
   3. User can run `pyproject_fmt --diff pyproject.toml` and see a human-readable diff of what would change
   4. User can add a `[tool.pyproject-fmt]` section to their pyproject.toml to override default behavior, with user settings winning over hardcoded defaults on conflict
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 02-01: CLI commands and file I/O
-- [ ] 02-02: Configuration loading and override merging
+- [ ] 02-01-PLAN.md -- CLI commands with fix/check/diff modes, file and stdin I/O, error handling, comprehensive test suite
+- [ ] 02-02-PLAN.md -- Configuration loading from [tool.pyproject-fmt], extend/replace merging, conflict detection, config test suite
 
 ### Phase 3: Integration
 **Goal**: The tool is installable via pip/uv and works as a pre-commit hook, ready for adoption in Python project workflows.
