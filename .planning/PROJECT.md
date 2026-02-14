@@ -2,7 +2,7 @@
 
 ## What This Is
 
-An opinionated CLI tool that sorts and formats `pyproject.toml` files. It uses toml-sort as a library for key/table sorting with hardcoded opinionated defaults (overridable via `[tool.pyproject-fmt]`), then applies taplo formatting for whitespace and style normalization. Designed to run as a standalone CLI command or as a pre-commit hook.
+An opinionated CLI tool that sorts and formats `pyproject.toml` files. It uses toml-sort as a library for key/table sorting with hardcoded opinionated defaults (overridable via `[tool.pyproject-fmt]`), then applies taplo formatting for whitespace and style normalization. Runs as a standalone CLI command or as a pre-commit hook.
 
 ## Core Value
 
@@ -19,21 +19,28 @@ Running `pyproject_fmt` on any `pyproject.toml` produces a consistently sorted a
 - ✓ Documentation scaffold with MkDocs — existing
 - ✓ Docker build — existing
 - ✓ Pre-commit hook scaffold — existing
+- ✓ Sort pyproject.toml tables and keys using toml-sort as a library dependency — v1.0
+- ✓ Apply opinionated sort_first ordering for common tool sections — v1.0
+- ✓ Apply per-table overrides (inline arrays, key ordering within [project]) — v1.0
+- ✓ Apply full taplo formatting after sorting — v1.0
+- ✓ Use taplo Python bindings for formatting — v1.0 (subprocess, not bindings — taplo has no Python bindings)
+- ✓ Ship hardcoded opinionated defaults baked into the tool — v1.0
+- ✓ Allow user overrides via `[tool.pyproject-fmt]` section — v1.0
+- ✓ Default mode: sort + format + write in-place — v1.0
+- ✓ --check mode: exit non-zero if changes needed — v1.0
+- ✓ --diff mode: show unified diff of changes — v1.0
+- ✓ Work as a pre-commit hook — v1.0
+- ✓ Read pyproject.toml from file path argument — v1.0
+- ✓ Target only pyproject.toml files — v1.0
+- ✓ Multiple file paths as arguments — v1.0
+- ✓ --version flag — v1.0
+- ✓ Golden file test suite with data loss detection — v1.0
+- ✓ Idempotent formatting (no oscillation) — v1.0
+- ✓ Comment preservation through full pipeline — v1.0
 
 ### Active
 
-- [ ] Sort pyproject.toml tables and keys using toml-sort as a library dependency
-- [ ] Apply opinionated sort_first ordering for common tool sections (project, build-system, dependency-groups, tool.*)
-- [ ] Apply per-table overrides (inline arrays, key ordering within [project], etc.)
-- [ ] Apply full taplo formatting after sorting (whitespace, alignment, style)
-- [ ] Use taplo Python bindings for formatting
-- [ ] Ship hardcoded opinionated defaults baked into the tool
-- [ ] Allow user overrides via `[tool.pyproject-fmt]` section in pyproject.toml
-- [ ] Default mode: sort + format + write in-place
-- [ ] --check mode: show diff and exit non-zero if changes needed
-- [ ] Work as a pre-commit hook
-- [ ] Read pyproject.toml from file path argument
-- [ ] Target only pyproject.toml files (not general TOML)
+(None — next milestone not yet planned)
 
 ### Out of Scope
 
@@ -45,22 +52,14 @@ Running `pyproject_fmt` on any `pyproject.toml` produces a consistently sorted a
 
 ## Context
 
-The tool replaces a two-step workflow (run toml-sort, then run taplo fmt) with a single command. The existing codebase is a scaffolded Typer CLI with placeholder commands — core formatting logic needs to be built from scratch.
-
-The user's toml-sort config establishes the opinionated defaults:
-- `sort_first` ordering: project > build-system > dependency-groups > tool.hatch > tool.git-cliff > ... > tool.tomlsort
-- Per-table overrides: inline arrays for build-system, dependency-groups, project, tool.pytest.*, tool.ruff.*, tool.ty.*
-- Key ordering within [project]: name, version, description, readme, dynamic, authors, maintainers, license, classifiers, keywords, requires-python, dependencies
-- toml-sort's own config section excluded from sorting (`table_keys = false`)
-
-Key dependencies:
-- toml-sort: Python library for TOML sorting (called via API, not CLI)
-- taplo: TOML formatter (via Python bindings)
-- typer: CLI framework (already in place)
+Shipped v1.0 with ~1,574 LOC Python across 3 phases (5 plans).
+Tech stack: Python 3.11+, Typer CLI, toml-sort (library), taplo (subprocess), pytest (50 tests).
+Pipeline: validate (tomllib) → sort (toml-sort) → format (taplo) → output.
+Known concern: taplo maintainer stepped down Dec 2024 — tombi is fallback if needed.
 
 ## Constraints
 
-- **Tech stack**: Python 3.11+, Typer CLI, toml-sort as library dep, taplo via Python bindings
+- **Tech stack**: Python 3.11+, Typer CLI, toml-sort as library dep, taplo via subprocess
 - **Target file**: pyproject.toml only — not a general TOML tool
 - **Compatibility**: Must work as pre-commit hook
 - **Output fidelity**: Output must match running toml-sort with the opinionated config, then taplo fmt on top
@@ -69,11 +68,16 @@ Key dependencies:
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Use toml-sort as library dependency | Avoid reimplementing sorting logic; leverage mature library | — Pending |
-| Use taplo Python bindings | Avoid requiring separate Rust binary on PATH | — Pending |
-| Hardcoded defaults with user overrides | Opinionated out of the box, flexible when needed | — Pending |
-| pyproject.toml only | Focused tool, not general TOML formatter | — Pending |
-| Pre-commit hook support | Essential workflow integration | — Pending |
+| Use toml-sort as library dependency | Avoid reimplementing sorting logic; leverage mature library | ✓ Good — works reliably |
+| Use taplo via subprocess (not Python bindings) | No Python bindings exist; subprocess with -o flags is clean | ✓ Good — idempotent |
+| Hardcoded defaults with user overrides | Opinionated out of the box, flexible when needed | ✓ Good — extend/replace merge pattern |
+| pyproject.toml only | Focused tool, not general TOML formatter | ✓ Good — keeps scope tight |
+| Pre-commit hook support | Essential workflow integration | ✓ Good — language: python auto-installs deps |
+| TAPLO_OPTIONS as tuple of strings | -o flag iteration for subprocess invocation | ✓ Good |
+| Golden file regenerated from pipeline output | Not hand-edited — ensures true fixed point | ✓ Good — 399 lines, 137 keys |
+| toml-sort spaces_indent_inline_array=4 | Aligned with taplo indent_string for idempotency | ✓ Good — prevents oscillation |
+| MergedConfig type alias (typed 5-tuple) | Avoids ty type-checker complaints with **unpacking | ✓ Good |
+| require_serial: false for pre-commit | Each file processed independently, taplo subprocess is stateless | ✓ Good |
 
 ---
-*Last updated: 2026-02-09 after initialization*
+*Last updated: 2026-02-14 after v1.0 milestone*
