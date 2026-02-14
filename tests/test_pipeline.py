@@ -1,12 +1,16 @@
-"""Pipeline tests: golden file comparison, idempotency, data loss detection."""
+"""Pipeline tests: golden file, idempotency, data loss, ordering, comments."""
 
 from __future__ import annotations
 
 import difflib
+import re
 import tomllib
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import pytest
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 from pyproject_fmt.pipeline import format_pyproject
 
@@ -151,3 +155,115 @@ def test_invalid_toml_raises():
     """Invalid TOML input must raise TOMLDecodeError."""
     with pytest.raises(tomllib.TOMLDecodeError):
         format_pyproject("[invalid\ntoml = ")
+
+
+def _extract_sections_with_keys(toml_text: str) -> dict[str, list[str]]:
+    """Split TOML text into sections and extract key names in order.
+
+    Args:
+        toml_text: Raw TOML string.
+
+    Returns:
+        Dict mapping table name (or "" for top-level) to ordered list of key names.
+    """
+    table_pattern = re.compile(r"^\[{1,2}([^\]]+)\]{1,2}", re.MULTILINE)
+    key_pattern = re.compile(r"^([\w][\w.-]*)\s*=", re.MULTILINE)
+
+    sections: dict[str, list[str]] = {}
+    lines = toml_text.splitlines()
+    current_table = ""
+    current_keys: list[str] = []
+
+    for line in lines:
+        table_match = table_pattern.match(line)
+        if table_match:
+            # Save previous section
+            sections[current_table] = current_keys
+            current_table = table_match.group(1).strip()
+            current_keys = []
+        else:
+            key_match = key_pattern.match(line)
+            if key_match:
+                current_keys.append(key_match.group(1))
+
+    # Save final section
+    sections[current_table] = current_keys
+    return sections
+
+
+# ---------------------------------------------------------------------------
+# TEST-04: Table ordering verification
+# ---------------------------------------------------------------------------
+def test_table_ordering_matches_golden(before_toml, after_toml):
+    """Table order in pipeline output must match golden file exactly."""
+    result = format_pyproject(before_toml)
+    table_pattern = re.compile(r"^\[{1,2}([^\]]+)\]{1,2}", re.MULTILINE)
+    golden_tables = table_pattern.findall(after_toml)
+    result_tables = table_pattern.findall(result)
+    assert result_tables == golden_tables, (
+        f"Table ordering mismatch.\nExpected: {golden_tables}\nActual: {result_tables}"
+    )
+
+
+# ---------------------------------------------------------------------------
+# TEST-04: Key ordering within tables
+# ---------------------------------------------------------------------------
+def test_key_ordering_within_tables(before_toml, after_toml):
+    """Key order within each table must match golden file exactly."""
+    result = format_pyproject(before_toml)
+    golden_sections = _extract_sections_with_keys(after_toml)
+    result_sections = _extract_sections_with_keys(result)
+
+    mismatches: list[str] = []
+    for table_name, golden_keys in golden_sections.items():
+        result_keys = result_sections.get(table_name, [])
+        if golden_keys != result_keys:
+            mismatches.append(
+                f"  [{table_name}]: expected {golden_keys}, got {result_keys}"
+            )
+    assert not mismatches, "Key ordering mismatch:\n" + "\n".join(mismatches)
+
+
+# ---------------------------------------------------------------------------
+# TEST-05: Comment preservation
+# ---------------------------------------------------------------------------
+def test_comment_preservation(before_toml):
+    """Every comment in input must appear in pipeline output."""
+    result = format_pyproject(before_toml)
+    comment_pattern = re.compile(r"#\s*(.+)")
+    before_comments = set(comment_pattern.findall(before_toml))
+    after_comments = set(comment_pattern.findall(result))
+    missing = before_comments - after_comments
+    assert not missing, "Comments lost during pipeline:\n" + "\n".join(
+        f"  - # {c}" for c in sorted(missing)
+    )
+
+
+# ---------------------------------------------------------------------------
+# TEST-05: Comment position fidelity
+# ---------------------------------------------------------------------------
+def test_comment_positions_match_golden(after_toml):
+    """Comment positions in pipeline output must match golden file."""
+    # Run pipeline on golden file (should be identity since golden is a fixed point)
+    result = format_pyproject(after_toml)
+    golden_comments = [
+        (i, line) for i, line in enumerate(after_toml.splitlines()) if "#" in line
+    ]
+    result_comments = [
+        (i, line) for i, line in enumerate(result.splitlines()) if "#" in line
+    ]
+    assert golden_comments == result_comments, (
+        "Comment positions shifted during pipeline re-run on golden file"
+    )
+
+
+# ---------------------------------------------------------------------------
+# TEST-01: Golden file exists as a real artifact
+# ---------------------------------------------------------------------------
+def test_golden_file_exists(fixtures_dir: Path):
+    """Golden file must exist as a first-class test artifact."""
+    golden = fixtures_dir / "after.toml"
+    assert golden.exists(), "Golden file after.toml does not exist"
+    assert golden.stat().st_size > 0, "Golden file is empty"
+    # Verify it's valid TOML
+    tomllib.loads(golden.read_text())
