@@ -13,7 +13,7 @@ pyproject-fmt delivers an opinionated CLI formatter for `pyproject.toml` files t
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Core Pipeline** - Sort and format pyproject.toml files with opinionated defaults, proven correct via golden file comparison, with data loss detection and comment/order fidelity verification
-- [ ] **Phase 2: CLI and Configuration** - User-facing command-line interface with check/diff modes and configurable overrides
+- [x] **Phase 2: CLI and Configuration** - User-facing command-line interface with check/diff modes and configurable overrides
 - [ ] **Phase 3: Integration** - Pre-commit hook support and pip-installable distribution
 
 ## Phase Details
@@ -47,8 +47,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 02-01-PLAN.md -- CLI commands with fix/check/diff modes, file and stdin I/O, error handling, comprehensive test suite
-- [ ] 02-02-PLAN.md -- Configuration loading from [tool.pyproject-fmt], extend/replace merging, conflict detection, config test suite
+- [x] 02-01-PLAN.md -- CLI commands with fix/check/diff modes, file and stdin I/O, error handling, comprehensive test suite
+- [x] 02-02-PLAN.md -- Configuration loading from [tool.pyproject-fmt], extend/replace merging, conflict detection, config test suite
 
 ### Phase 3: Integration
 **Goal**: The tool is installable via pip/uv and works as a pre-commit hook, ready for adoption in Python project workflows.
@@ -70,5 +70,5 @@ Phases execute in numeric order: 1 -> 2 -> 3
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Core Pipeline | 2/2 | Complete | 2026-02-13 |
-| 2. CLI and Configuration | 0/2 | Not started | - |
+| 2. CLI and Configuration | 2/2 | Complete | 2026-02-14 |
 | 3. Integration | 0/1 | Not started | - |
