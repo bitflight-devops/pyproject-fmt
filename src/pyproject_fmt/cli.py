@@ -11,6 +11,12 @@ from typing import Annotated
 import typer
 
 from pyproject_fmt import __version__
+from pyproject_fmt.config import (
+    MergedConfig,
+    check_config_conflict,
+    load_config,
+    merge_config,
+)
 from pyproject_fmt.pipeline import format_pyproject
 
 _RED = "\033[31m"
@@ -55,6 +61,45 @@ def _print_diff(original: str, formatted: str, filename: str) -> None:
             sys.stdout.write(line)
 
 
+def _load_and_warn(text: str) -> MergedConfig | None:
+    """Load config from text, emit conflict warning, return merged config.
+
+    Returns a ``MergedConfig`` 5-tuple when ``[tool.pyproject-fmt]`` is
+    present, or ``None`` so the pipeline uses its hardcoded defaults.
+
+    If the TOML is invalid, returns ``None`` -- the pipeline's own
+    validation will catch and report the parse error.
+    """
+    try:
+        warning = check_config_conflict(text)
+    except tomllib.TOMLDecodeError:
+        return None
+
+    if warning is not None:
+        typer.echo(warning, err=True)
+
+    user_config = load_config(text)
+    if user_config is None:
+        return None
+
+    return merge_config(user_config)
+
+
+def _format_with_config(text: str, merged: MergedConfig | None) -> str:
+    """Run ``format_pyproject`` with optional merged config."""
+    if merged is None:
+        return format_pyproject(text)
+    sort_cfg, overrides, comment_cfg, format_cfg, taplo_opts = merged
+    return format_pyproject(
+        text,
+        sort_config=sort_cfg,
+        sort_overrides=overrides,
+        comment_config=comment_cfg,
+        format_config=format_cfg,
+        taplo_options=taplo_opts,
+    )
+
+
 def _process_file(filepath: str, *, check: bool, diff: bool) -> int:
     """Process a single file through the formatting pipeline.
 
@@ -70,8 +115,10 @@ def _process_file(filepath: str, *, check: bool, diff: bool) -> int:
         typer.echo(f"error: {filepath}: permission denied", err=True)
         return 1
 
+    merged = _load_and_warn(text)
+
     try:
-        result = format_pyproject(text)
+        result = _format_with_config(text, merged)
     except tomllib.TOMLDecodeError as exc:
         typer.echo(f"error: {filepath}: {exc}", err=True)
         return 1
@@ -126,8 +173,9 @@ def main(
     if not files:
         # Stdin mode
         text = sys.stdin.read()
+        merged = _load_and_warn(text)
         try:
-            result = format_pyproject(text)
+            result = _format_with_config(text, merged)
         except tomllib.TOMLDecodeError as exc:
             typer.echo(f"error: stdin: {exc}", err=True)
             raise typer.Exit(code=1) from None
