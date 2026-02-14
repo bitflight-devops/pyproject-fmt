@@ -1,0 +1,9 @@
+- id: pyproject-fmt
+  name: pyproject-fmt
+  description: Sort and format pyproject.toml files
+  entry: pyproject_fmt
+  language: python
+  files: (^|/)pyproject\.toml$
+  args: []
+  require_serial: false
+  minimum_pre_commit_version: "3.2.0"
