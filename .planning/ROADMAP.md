@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Core Pipeline** - Sort and format pyproject.toml files with opinionated defaults, proven correct via golden file comparison, with data loss detection and comment/order fidelity verification
 - [x] **Phase 2: CLI and Configuration** - User-facing command-line interface with check/diff modes and configurable overrides
-- [ ] **Phase 3: Integration** - Pre-commit hook support and pip-installable distribution
+- [x] **Phase 3: Integration** - Pre-commit hook support and pip-installable distribution
 
 ## Phase Details
 
@@ -60,7 +60,7 @@ Plans:
 **Plans:** 1 plan
 
 Plans:
-- [ ] 03-01-PLAN.md -- Pre-commit hook definition, integration tests, and self-hosted hook
+- [x] 03-01-PLAN.md -- Pre-commit hook definition, integration tests, and self-hosted hook
 
 ## Progress
 
@@ -71,4 +71,4 @@ Phases execute in numeric order: 1 -> 2 -> 3
 |-------|----------------|--------|-----------|
 | 1. Core Pipeline | 2/2 | Complete | 2026-02-13 |
 | 2. CLI and Configuration | 2/2 | Complete | 2026-02-14 |
-| 3. Integration | 0/1 | Not started | - |
+| 3. Integration | 1/1 | Complete | 2026-02-14 |
