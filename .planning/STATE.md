@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-09)
 
 **Core value:** Running `pyproject_fmt` on any `pyproject.toml` produces a consistently sorted and formatted file -- deterministic output regardless of input ordering.
-**Current focus:** Phase 2 complete. Ready for Phase 3: Pre-commit Integration
+**Current focus:** All phases complete. Project ready for v0.1.0 release.
 
 ## Current Position
 
-Phase: 2 of 3 (CLI and Configuration) -- COMPLETE
-Plan: 2 of 2 in current phase (all done)
-Status: Phase 2 complete, ready for Phase 3
-Last activity: 2026-02-14 -- Completed 02-02 (Configuration loading and merging)
+Phase: 3 of 3 (Integration) -- COMPLETE
+Plan: 1 of 1 in current phase (all done)
+Status: All phases complete
+Last activity: 2026-02-14 -- Completed 03-01 (Pre-commit hook definition and integration tests)
 
-Progress: [████████████████████] 80% (4/5 plans total)
+Progress: [█████████████████████████] 100% (5/5 plans total)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
-- Average duration: 4min
-- Total execution time: 0.32 hours
+- Total plans completed: 5
+- Average duration: 3min
+- Total execution time: 0.35 hours
 
 **By Phase:**
 
@@ -29,10 +29,11 @@ Progress: [████████████████████] 80% (4/
 |-------|-------|-------|----------|
 | 01-core-pipeline | 2/2 | 6min | 3min |
 | 02-cli-and-configuration | 2/2 | 9min | 5min |
+| 03-integration | 1/1 | 2min | 2min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (3min), 01-02 (3min), 02-01 (4min), 02-02 (5min)
-- Trend: Stable at ~4min/plan
+- Last 5 plans: 01-02 (3min), 02-01 (4min), 02-02 (5min), 03-01 (2min)
+- Trend: Stable at ~3min/plan
 
 *Updated after each plan completion*
 
@@ -55,6 +56,10 @@ Recent decisions affecting current work:
 - [02-02]: MergedConfig type alias (typed 5-tuple) instead of dict kwargs -- avoids ty type-checker complaints with **unpacking
 - [02-02]: _load_and_warn catches TOMLDecodeError from config parsing so invalid TOML falls through to pipeline validation
 - [02-02]: Config functions use explicit typed returns rather than generic dicts
+- [03-01]: require_serial: false -- each file processed independently, taplo subprocess is stateless
+- [03-01]: minimum_pre_commit_version 3.2.0 -- reasonable floor matching pre-commit-hooks repo
+- [03-01]: Self-hosted hook uses language: system with uv run for development environment
+- [03-01]: Integration tests use subprocess.run with uv run prefix rather than direct entry point
 
 ### Pending Todos
 
@@ -69,5 +74,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-14
-Stopped at: Completed 02-02-PLAN.md (Configuration loading and merging)
+Stopped at: Completed 03-01-PLAN.md (Pre-commit hook definition and integration tests)
 Resume file: None
+Note: All phases complete. Project ready for v0.1.0 release.
