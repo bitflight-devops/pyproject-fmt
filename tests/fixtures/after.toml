@@ -1,13 +1,8 @@
-[build-system]
-requires = ["hatchling", "hatch-vcs"]
-build-backend = "hatchling.build"
-
 [project]
 name = "claude-linting-hook"
-dynamic = ["version"]
 description = "A robust, fully portable Claude Code hook that automatically detects project configuration and applies appropriate linting tools based on modified files."
 readme = "README.md"
-
+dynamic = ["version"]
 authors = [{ name = "Jamie Nelson", email = "jamie.nelson@assaabloy.com" }]
 maintainers = [{ name = "Jamie Nelson", email = "jamie.nelson@assaabloy.com" }]
 license = { text = "MIT" }
@@ -23,22 +18,26 @@ classifiers = [
     "Topic :: Software Development :: Quality Assurance",
 ]
 keywords = [
-    "claude",
-    "linting",
-    "hook",
-    "automation",
-    "code",
-    "quality",
     "assurance",
+    "automation",
+    "claude",
+    "code",
+    "hook",
+    "linting",
+    "quality",
 ]
 requires-python = ">=3.11,<3.14"
 dependencies = [
+    "basedpyright>=1.33.0",
     "gitpython>=3.1.45",
     "mypy>=1.17.1",
-    "basedpyright>=1.33.0",
     "ruff>=0.12.10",
     "typer>=0.19.2",
 ]
+
+[build-system]
+requires = ["hatch-vcs", "hatchling"]
+build-backend = "hatchling.build"
 
 [dependency-groups]
 dev = [
@@ -58,51 +57,85 @@ dev = [
     "uv-sort>=0.7.0",
 ]
 
+[tool.basedpyright]
+typeCheckingMode = "off"
+
+[tool.coverage.report]
+exclude_lines = [
+    "def __repr__",
+    "if TYPE_CHECKING:",
+    "if __name__ == .__main__.:",
+    "pragma: no cover",
+    "raise AssertionError",
+    "raise NotImplementedError",
+]
+
+[tool.coverage.run]
+omit = ["*/tests/*", ".gitlab/scripts/*", "tests/*"]
+source = ["claude_lint_hook.py"]
 
 [tool.git-cliff]
 config = "cliff.toml"
 
+[tool.hatch.build.targets.sdist]
+include = ["README.md", "claude_lint_hook.py", "pyproject.toml"]
 
-[tool.ty.environment]
-root = ["./"]
+[tool.hatch.build.targets.sdist.hooks.custom]
+path = "scripts/hatch_build.py"
 
-[[tool.ty.overrides]]
-include = ["**/test_*.py", "tests/**"]
+[tool.hatch.build.targets.wheel]
+include = ["claude_lint_hook.py"]
 
-[tool.ty.overrides.rules]
-invalid-argument-type = "warn"
-invalid-assignment = "warn"
-possibly-unresolved-reference = "warn"
-unresolved-attribute = "warn"
+[tool.hatch.version]
+source = "vcs"
 
-[tool.ty.src]
-include = ["**/*.py", "*.py"]
-[tool.uv]
+[tool.mypy]
+exclude = [".*"]
 
-[[tool.uv.index]]
-default = true
-name = "pypi"
-url = "https://pypi.org/simple"
+[tool.pylint.'MESSAGES CONTROL']
+disable = """
+    invalid-name,
+    line-too-long,
+    logging-fstring-interpolation,
+    missing-class-docstring,
+    missing-function-docstring,
+    missing-module-docstring,
+    unused-variable,
+    wrong-import-position,
+"""
+max-line-length = 120
 
-[[tool.uv.index]]
-default = false
-explicit = true
-name = "gitlab"
-url = "https://sourcery.assaabloy.net/api/v4/groups/aehgfw/-/packages/pypi/simple"
+[tool.pytest.ini_options]
+addopts = [
+    "--dist",
+    "--strict-config",
+    "--strict-markers",
+    "--tb=short",
+    "-n",
+    "auto",
+    "loadgroup",
+]
+markers = [
+    "demos: marks tests as demonstration tests",
+    "e2e: marks tests as end-to-end tests",
+    "integration: marks tests as integration tests",
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "unit: marks tests as unit tests",
+]
+pythonpath = ["."]
+testpaths = ["tests"]
 
 [tool.ruff]
-
-src = ["packages", "scripts", "tests", "typings", ".gitlab"]
-
-
-line-length = 120
-target-version = "py311"
 fix = true
+line-length = 120
+src = [".gitlab", "packages", "scripts", "tests", "typings"]
+target-version = "py311"
 unsafe-fixes = true
+
 [tool.ruff.format]
 docstring-code-format = true
-quote-style = "double"
 line-ending = "lf"
+quote-style = "double"
 skip-magic-trailing-comma = true
 
 [tool.ruff.lint]
@@ -179,24 +212,26 @@ ignore = [
 ]
 unfixable = ["F401"]
 
+[tool.ruff.lint.mccabe]
+max-complexity = 12
+
 [tool.ruff.lint.per-file-ignores]
-"**/tests/**" = [
-    "S",    # Security checks not needed in tests
-    "D",    # Docstring requirements relaxed for tests
-    "E501", # Line length relaxed for test data
-    "ANN",  # Type annotations optional for test fixtures/methods
-    "DOC",  # Docstring content requirements relaxed
-    "PLC",  # Local imports acceptable in test helpers
-    "SLF",  # Private name imports acceptable for testing internals
-    "PLR",  # Testing private methods is valid test pattern
-    "EXE",  # Shebang executable check skipped for PEP723 test files
-    "N",    # camelCase in test names acceptable when testing API fields
-    "T",    # print() statements are intentional for CI output visibility
-    "BLE",  # Blind exception catching acceptable in test utilities
-]
-"typings/**" = ["N", "ANN", "A"]
 "**/scripts/**" = [
     "T201", # print() statements are intentional for CI output visibility
+]
+"**/tests/**" = [
+    "ANN",  # Type annotations optional for test fixtures/methods
+    "BLE",  # Blind exception catching acceptable in test utilities
+    "D",    # Docstring requirements relaxed for tests
+    "DOC",  # Docstring content requirements relaxed
+    "E501", # Line length relaxed for test data
+    "EXE",  # Shebang executable check skipped for PEP723 test files
+    "N",    # camelCase in test names acceptable when testing API fields
+    "PLC",  # Local imports acceptable in test helpers
+    "PLR",  # Testing private methods is valid test pattern
+    "S",    # Security checks not needed in tests
+    "SLF",  # Private name imports acceptable for testing internals
+    "T",    # print() statements are intentional for CI output visibility
 ]
 # Claude Code hook implementation has special constraints:
 # - Hook protocol requires complex entry points (main, _handle_connection, _run_singleton_server)
@@ -205,97 +240,38 @@ unfixable = ["F401"]
 # - File locking requires defensive exception handling for robustness
 # - Platform-specific code (ctypes) requires conditional imports
 "claude_lint_hook.py" = [
+    "ANN401",  # Any types: required for signal handlers (FrameType) and context managers
+    "BLE001",  # Blind exceptions justified: file locking and cleanup require defensive handling
+    "C901",    # Complexity justified: protocol-mandated control flow
+    "DOC201",  # Returns sections: simplified docstrings acceptable for internal helpers
+    "N815",    # camelCase REQUIRED: Claude Hook API field names must match protocol
+    "PLC0415", # Deferred imports justified: platform-specific (ctypes), startup perf (argparse, select, threading)
     "PLR0911", # Complex functions justified: socket handling requires many return paths
     "PLR0912", # Complex functions justified: hook protocol entry points
     "PLR0915", # Complex functions justified: singleton server and main entry
-    "C901",    # Complexity justified: protocol-mandated control flow
-    "N815",    # camelCase REQUIRED: Claude Hook API field names must match protocol
-    "BLE001",  # Blind exceptions justified: file locking and cleanup require defensive handling
-    "PLC0415", # Deferred imports justified: platform-specific (ctypes), startup perf (argparse, select, threading)
-    "DOC201",  # Returns sections: simplified docstrings acceptable for internal helpers
-    "ANN401",  # Any types: required for signal handlers (FrameType) and context managers
     "PYI036",  # __exit__ annotations: standard Python pattern using object
     "SLF001",  # Private member access: backward compat delegations and main() logging initialization by design
 ]
+"typings/**" = ["A", "ANN", "N"]
 
 [tool.ruff.lint.pycodestyle]
 max-line-length = 120
 
-
 [tool.ruff.lint.pydocstyle]
 convention = "google"
 
-[tool.ruff.lint.mccabe]
-max-complexity = 12
-[tool.mypy]
-exclude = [".*"]
-
-
-[tool.basedpyright]
-typeCheckingMode = "off"
-
-[tool.pylint.'MESSAGES CONTROL']
-disable = """
-    invalid-name,
-    line-too-long,
-    logging-fstring-interpolation,
-    missing-class-docstring,
-    missing-function-docstring,
-    missing-module-docstring,
-    unused-variable,
-    wrong-import-position,
-"""
-max-line-length = 120
-
-[tool.pytest.ini_options]
-pythonpath = ["."]
-testpaths = ["tests"]
-addopts = [
-    "--tb=short",
-    "--strict-markers",
-    "--strict-config",
-    "-n",
-    "auto",
-    "--dist",
-    "loadgroup",
-]
-markers = [
-    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
-    "unit: marks tests as unit tests",
-    "integration: marks tests as integration tests",
-    "e2e: marks tests as end-to-end tests",
-    "demos: marks tests as demonstration tests",
-]
-
-[tool.coverage.run]
-source = ["claude_lint_hook.py"]
-omit = ["tests/*", "*/tests/*", ".gitlab/scripts/*"]
-
-[tool.coverage.report]
-exclude_lines = [
-    "pragma: no cover",
-    "def __repr__",
-    "if __name__ == .__main__.:",
-    "raise AssertionError",
-    "raise NotImplementedError",
-    "if TYPE_CHECKING:",
-]
-
-
 [tool.semantic_release]
-version_toml = []
-major_on_zero = true
 allow_zero_version = true
-tag_format = "v{version}"
 build_command = "uv build"
+major_on_zero = true
+tag_format = "v{version}"
+version_toml = []
 
 [tool.semantic_release.branches.main]
 match = "(main|master)"
 prerelease = false
 
 [tool.semantic_release.commit_parser_options]
-patch_tags = ["fix", "refactor", "perf"]
-
 allowed_tags = [
     "build",
     "chore",
@@ -304,23 +280,12 @@ allowed_tags = [
     "feat",
     "fix",
     "perf",
-    "style",
     "refactor",
+    "style",
     "test",
 ]
 minor_tags = ["feat"]
-[tool.hatch.version]
-source = "vcs"
-
-[tool.hatch.build.targets.sdist]
-include = ["claude_lint_hook.py", "pyproject.toml", "README.md"]
-
-[tool.hatch.build.targets.sdist.hooks.custom]
-path = "scripts/hatch_build.py"
-
-[tool.hatch.build.targets.wheel]
-include = ["claude_lint_hook.py"]
-
+patch_tags = ["fix", "perf", "refactor"]
 
 [tool.tomlsort]
 in_place = true
@@ -403,5 +368,32 @@ inline_arrays = false
 inline_arrays = true
 
 [tool.tomlsort.overrides."tool.ty.*"]
-
 inline_arrays = true
+
+[tool.ty.environment]
+root = ["./"]
+
+[[tool.ty.overrides]]
+include = ["**/test_*.py", "tests/**"]
+
+[tool.ty.overrides.rules]
+invalid-argument-type = "warn"
+invalid-assignment = "warn"
+possibly-unresolved-reference = "warn"
+unresolved-attribute = "warn"
+
+[tool.ty.src]
+include = ["**/*.py", "*.py"]
+
+[tool.uv]
+
+[[tool.uv.index]]
+default = true
+name = "pypi"
+url = "https://pypi.org/simple"
+
+[[tool.uv.index]]
+default = false
+explicit = true
+name = "gitlab"
+url = "https://sourcery.assaabloy.net/api/v4/groups/aehgfw/-/packages/pypi/simple"
