@@ -57,10 +57,10 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. User can `pip install pyproject-fmt` (or `uv pip install`) and run `pyproject_fmt` as a CLI command
   2. User can add pyproject-fmt to `.pre-commit-config.yaml` and it formats pyproject.toml on commit, requiring only one run (no oscillation)
-**Plans**: TBD
+**Plans:** 1 plan
 
 Plans:
-- [ ] 03-01: Package distribution and pre-commit hook
+- [ ] 03-01-PLAN.md -- Pre-commit hook definition, integration tests, and self-hosted hook
 
 ## Progress
 
