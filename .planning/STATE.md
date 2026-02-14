@@ -5,34 +5,34 @@
 See: .planning/PROJECT.md (updated 2026-02-09)
 
 **Core value:** Running `pyproject_fmt` on any `pyproject.toml` produces a consistently sorted and formatted file -- deterministic output regardless of input ordering.
-**Current focus:** Phase 2: CLI and Configuration
+**Current focus:** Phase 2 complete. Ready for Phase 3: Pre-commit Integration
 
 ## Current Position
 
-Phase: 2 of 3 (CLI and Configuration)
-Plan: 1 of 2 in current phase
-Status: Executing Phase 2
-Last activity: 2026-02-14 -- Completed 02-01 (CLI commands)
+Phase: 2 of 3 (CLI and Configuration) -- COMPLETE
+Plan: 2 of 2 in current phase (all done)
+Status: Phase 2 complete, ready for Phase 3
+Last activity: 2026-02-14 -- Completed 02-02 (Configuration loading and merging)
 
-Progress: [██████████████░░░░░░] 60% (3/5 plans total)
+Progress: [████████████████████] 80% (4/5 plans total)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
-- Average duration: 3min
-- Total execution time: 0.17 hours
+- Total plans completed: 4
+- Average duration: 4min
+- Total execution time: 0.32 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-core-pipeline | 2/2 | 6min | 3min |
-| 02-cli-and-configuration | 1/2 | 4min | 4min |
+| 02-cli-and-configuration | 2/2 | 9min | 5min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (3min), 01-02 (3min), 02-01 (4min)
-- Trend: Stable at ~3min/plan
+- Last 5 plans: 01-01 (3min), 01-02 (3min), 02-01 (4min), 02-02 (5min)
+- Trend: Stable at ~4min/plan
 
 *Updated after each plan completion*
 
@@ -52,6 +52,9 @@ Recent decisions affecting current work:
 - [01-02]: Comment fidelity tested two ways: set membership and positional stability on golden fixed point
 - [02-01]: Simple "reformatted" message to stderr rather than counting tables/keys (start simple per research)
 - [02-01]: version parameter uses noqa: ARG001 -- Typer callback pattern requires unused parameter in function signature
+- [02-02]: MergedConfig type alias (typed 5-tuple) instead of dict kwargs -- avoids ty type-checker complaints with **unpacking
+- [02-02]: _load_and_warn catches TOMLDecodeError from config parsing so invalid TOML falls through to pipeline validation
+- [02-02]: Config functions use explicit typed returns rather than generic dicts
 
 ### Pending Todos
 
@@ -66,5 +69,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-14
-Stopped at: Completed 02-01-PLAN.md (CLI commands)
+Stopped at: Completed 02-02-PLAN.md (Configuration loading and merging)
 Resume file: None
