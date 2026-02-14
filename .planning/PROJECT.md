@@ -52,10 +52,11 @@ Running `pyproject_fmt` on any `pyproject.toml` produces a consistently sorted a
 
 ## Context
 
-Shipped v1.0 with ~1,574 LOC Python across 3 phases (5 plans).
+~1,574 LOC Python across 3 phases (5 plans). v1.0 milestone reverted — golden file contamination discovered (phase 3.1 inserted to fix).
 Tech stack: Python 3.11+, Typer CLI, toml-sort (library), taplo (subprocess), pytest (50 tests).
 Pipeline: validate (tomllib) → sort (toml-sort) → format (taplo) → output.
 Known concern: taplo maintainer stepped down Dec 2024 — tombi is fallback if needed.
+Known bug: pipeline sorts all array elements including positional arrays (e.g. pytest addopts).
 
 ## Constraints
 
@@ -80,4 +81,4 @@ Known concern: taplo maintainer stepped down Dec 2024 — tombi is fallback if n
 | require_serial: false for pre-commit | Each file processed independently, taplo subprocess is stateless | ✓ Good |
 
 ---
-*Last updated: 2026-02-14 after v1.0 milestone*
+*Last updated: 2026-02-14 — v1.0 milestone reverted, phase 3.1 inserted*
