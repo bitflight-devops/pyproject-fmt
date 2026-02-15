@@ -2,36 +2,27 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-14)
+See: .planning/PROJECT.md (updated 2026-02-15)
 
 **Core value:** Running `pyproject_fmt` on any `pyproject.toml` produces a consistently sorted and formatted file -- deterministic output regardless of input ordering.
-**Current focus:** Phase 3.1 — Golden file correction (inserted phase)
+**Current focus:** v1.0 shipped — planning next milestone
 
 ## Current Position
 
-Phase: 3.1 of 3.1 (Golden File Correction) -- COMPLETE
-Plan: 1 of 1 in current phase
-Status: Phase 3.1 complete -- golden file restored, pipeline configuration fixed, all 50 tests pass
-Last activity: 2026-02-15 -- Executed 03.1-01-PLAN.md
+Milestone: v1.0 MVP — SHIPPED 2026-02-15
+Status: All 4 phases complete, 6 plans executed, 50 tests passing
+Last activity: 2026-02-15 -- Milestone archived
 
-Progress: [█████████████████████████] 100% (6/6 plans total)
-
-## Incident: Golden File Contamination
-
-**What happened:** Phase 1 researcher recommended regenerating the user-provided `after.toml` golden file from pipeline output. The planner codified this as Task 3 of plan 01-01. The executor overwrote the user's specification file. All downstream tests validated against the pipeline's own output — circular validation. Every gate (plan checker, verifier, milestone) passed without detecting the inversion.
-
-**Impact:** TEST-01, TEST-02, TEST-06 are invalidated. Pipeline may have correctness bugs masked by the circular golden file. Known: pytest addopts array sorting breaks positional argument pairs.
-
-**Resolution:** Phase 3.1 restored the original golden file from commit c7e8f30, fixed all pipeline configuration deviations. Golden file updated with pipeline blank line normalization (semantic content matches c7e8f30 on all non-blank lines). All 50 tests pass.
-
-**Pattern recorded:** See memory/golden-file-contamination.md
+Progress: [█████████████████████████] 100% (v1.0 complete)
 
 ## Performance Metrics
 
-**v1.0 Velocity (phases 1-3, before correction):**
-- Total plans completed: 5
-- Average duration: 3min
-- Total execution time: 0.35 hours
+**v1.0 Velocity:**
+- Total plans completed: 6
+- Total tasks: 14
+- Total execution time: 28 min
+- Average duration: 5min/plan
+- Timeline: 5 days (2026-02-09 → 2026-02-14)
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
@@ -44,26 +35,19 @@ Progress: [███████████████████████
 
 ### Decisions
 
-All v1.0 decisions logged in PROJECT.md Key Decisions table.
-**INVALIDATED decision:** "Golden file regenerated from pipeline output" — this was the contamination source.
-**Phase 3.1 decisions:**
-- sort_first root list contains only root-level table names; sub-table ordering via parent override first lists
-- Golden file updated with pipeline blank line normalization (semantic content matches c7e8f30)
-- project first list corrected to golden key order: name, dynamic, description, readme
+All v1.0 decisions archived in .planning/milestones/v1.0-ROADMAP.md and PROJECT.md Key Decisions table.
 
 ### Pending Todos
 
-None -- phase 3.1 complete.
+None -- next milestone not yet planned.
 
 ### Blockers/Concerns
 
-- [RESOLVED]: Golden file contamination — fixed in phase 3.1
-- [RESOLVED]: toml-sort sorts all array elements by default — fixed via selective inline_arrays overrides
 - [Research]: taplo maintainer stepped down Dec 2024 -- monitor project, tombi is fallback
 
 ## Session Continuity
 
 Last session: 2026-02-15
-Stopped at: Completed 03.1-01-PLAN.md
+Stopped at: v1.0 milestone completed and archived
 Resume file: None
-Note: Phase 3.1 golden file correction complete. All 50 tests pass.
+Note: Run `/gsd:new-milestone` to start next milestone

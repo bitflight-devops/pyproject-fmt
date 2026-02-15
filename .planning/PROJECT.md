@@ -52,11 +52,11 @@ Running `pyproject_fmt` on any `pyproject.toml` produces a consistently sorted a
 
 ## Context
 
-~1,574 LOC Python across 3 phases (5 plans). v1.0 milestone reverted — golden file contamination discovered (phase 3.1 inserted to fix).
+Shipped v1.0 with 1,593 LOC Python across 4 phases (6 plans, 14 tasks) in 5 days.
 Tech stack: Python 3.11+, Typer CLI, toml-sort (library), taplo (subprocess), pytest (50 tests).
 Pipeline: validate (tomllib) → sort (toml-sort) → format (taplo) → output.
 Known concern: taplo maintainer stepped down Dec 2024 — tombi is fallback if needed.
-Known bug: pipeline sorts all array elements including positional arrays (e.g. pytest addopts).
+Array sorting fixed in v1.0: selective sorting via inline_arrays overrides (only classifiers, lint rules, dependency-groups sorted; positional arrays preserved).
 
 ## Constraints
 
@@ -75,10 +75,12 @@ Known bug: pipeline sorts all array elements including positional arrays (e.g. p
 | pyproject.toml only | Focused tool, not general TOML formatter | ✓ Good — keeps scope tight |
 | Pre-commit hook support | Essential workflow integration | ✓ Good — language: python auto-installs deps |
 | TAPLO_OPTIONS as tuple of strings | -o flag iteration for subprocess invocation | ✓ Good |
-| Golden file regenerated from pipeline output | Not hand-edited — ensures true fixed point | ✓ Good — 399 lines, 137 keys |
+| Golden file as user-provided specification | Pipeline must match golden file, not the reverse | ⚠️ Revisit — v1.0 initially contaminated by regeneration; fixed in phase 3.1 |
 | toml-sort spaces_indent_inline_array=4 | Aligned with taplo indent_string for idempotency | ✓ Good — prevents oscillation |
 | MergedConfig type alias (typed 5-tuple) | Avoids ty type-checker complaints with **unpacking | ✓ Good |
 | require_serial: false for pre-commit | Each file processed independently, taplo subprocess is stateless | ✓ Good |
+| sort_first decomposition pattern | Root first list + parent override first lists (mirrors toml-sort CLI parse_sort_first) | ✓ Good — discovered during 3.1, now documented |
+| Selective array sorting | Global inline_arrays=False + per-path overrides for arrays that should be sorted | ✓ Good — fixes positional array corruption |
 
 ---
-*Last updated: 2026-02-14 — v1.0 milestone reverted, phase 3.1 inserted*
+*Last updated: 2026-02-15 after v1.0 milestone*
