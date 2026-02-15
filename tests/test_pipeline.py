@@ -12,7 +12,7 @@ import pytest
 if TYPE_CHECKING:
     from pathlib import Path
 
-from pyproject_fmt.pipeline import format_pyproject
+from pypfmt.pipeline import format_pyproject
 
 
 def _flatten_dict(data: dict[str, Any], prefix: str = "") -> dict[str, Any]:

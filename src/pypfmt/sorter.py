@@ -18,7 +18,7 @@ if TYPE_CHECKING:
         SortOverrideConfiguration,
     )
 
-from pyproject_fmt.config import (
+from pypfmt.config import (
     get_comment_config,
     get_format_config,
     get_sort_config,

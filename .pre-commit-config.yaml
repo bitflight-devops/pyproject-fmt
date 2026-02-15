@@ -22,12 +22,12 @@ repos:
         args: [--fix]
       - id: ruff-format
 
-  # pyproject-fmt - self-hosted hook for dogfooding
+  # pypfmt - self-hosted hook for dogfooding
   - repo: local
     hooks:
-      - id: pyproject-fmt
-        name: pyproject-fmt
-        entry: uv run pyproject_fmt
+      - id: pypfmt
+        name: pypfmt
+        entry: uv run pypfmt
         language: system
         files: (^|/)pyproject\.toml$
         pass_filenames: true

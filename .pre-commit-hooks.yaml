@@ -1,7 +1,7 @@
-- id: pyproject-fmt
-  name: pyproject-fmt
+- id: pypfmt
+  name: pypfmt
   description: Sort and format pyproject.toml files
-  entry: pyproject_fmt
+  entry: pypfmt
   language: python
   files: (^|/)pyproject\.toml$
   args: []

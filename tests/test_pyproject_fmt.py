@@ -1,12 +1,12 @@
-"""CLI tests for pyproject_fmt."""
+"""CLI tests for pypfmt."""
 
 from pathlib import Path
 
 from typer.testing import CliRunner
 
-from pyproject_fmt import __version__
-from pyproject_fmt.cli import app
-from pyproject_fmt.pipeline import format_pyproject
+from pypfmt import __version__
+from pypfmt.cli import app
+from pypfmt.pipeline import format_pyproject
 
 runner = CliRunner()
 

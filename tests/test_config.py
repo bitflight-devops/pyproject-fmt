@@ -1,10 +1,10 @@
-"""Tests for config loading, merging, and conflict detection."""
+"""Tests for pypfmt config loading, merging, and conflict detection."""
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from pyproject_fmt.config import (
+from pypfmt.config import (
     TAPLO_OPTIONS,
     check_config_conflict,
     get_comment_config,
@@ -23,21 +23,21 @@ if TYPE_CHECKING:
 
 
 def test_load_config_no_section() -> None:
-    """TOML with no [tool.pyproject-fmt] returns None."""
+    """TOML with no [tool.pypfmt] returns None."""
     toml = '[project]\nname = "test"\n'
     assert load_config(toml) is None
 
 
 def test_load_config_with_section() -> None:
-    """TOML with [tool.pyproject-fmt] returns the config dict."""
-    toml = "[tool.pyproject-fmt]\nsort-tables = false\n"
+    """TOML with [tool.pypfmt] returns the config dict."""
+    toml = "[tool.pypfmt]\nsort-tables = false\n"
     result = load_config(toml)
     assert result == {"sort-tables": False}
 
 
 def test_load_config_empty_section() -> None:
-    """TOML with empty [tool.pyproject-fmt] returns empty dict."""
-    toml = "[tool.pyproject-fmt]\n"
+    """TOML with empty [tool.pypfmt] returns empty dict."""
+    toml = "[tool.pypfmt]\n"
     result = load_config(toml)
     assert result == {}
 
@@ -46,24 +46,24 @@ def test_load_config_empty_section() -> None:
 
 
 def test_check_conflict_no_conflict() -> None:
-    """TOML with only [tool.pyproject-fmt] returns None."""
-    toml = "[tool.pyproject-fmt]\n"
+    """TOML with only [tool.pypfmt] returns None."""
+    toml = "[tool.pypfmt]\n"
     assert check_config_conflict(toml) is None
 
 
 def test_check_conflict_both_present() -> None:
     """TOML with both sections returns warning string."""
-    toml = "[tool.tomlsort]\n\n[tool.pyproject-fmt]\n"
+    toml = "[tool.tomlsort]\n\n[tool.pypfmt]\n"
     result = check_config_conflict(toml)
     assert result is not None
     assert "[tool.tomlsort]" in result
-    assert "[tool.pyproject-fmt]" in result
+    assert "[tool.pypfmt]" in result
 
 
 def test_check_conflict_suppressed(monkeypatch: pytest.MonkeyPatch) -> None:
     """PPF_HIDE_CONFLICT_WARNING=1 suppresses the warning."""
     monkeypatch.setenv("PPF_HIDE_CONFLICT_WARNING", "1")
-    toml = "[tool.tomlsort]\n\n[tool.pyproject-fmt]\n"
+    toml = "[tool.tomlsort]\n\n[tool.pypfmt]\n"
     assert check_config_conflict(toml) is None
 
 
@@ -217,7 +217,7 @@ def test_config_affects_pipeline_output() -> None:
     Default sort_first has "build-system" before "project".
     With sort-first = ["project", "build-system"], project comes first.
     """
-    from pyproject_fmt.pipeline import format_pyproject
+    from pypfmt.pipeline import format_pyproject
 
     toml_input = (
         "[project]\n"

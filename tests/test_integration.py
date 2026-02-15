@@ -16,15 +16,15 @@ UNFORMATTED_TOML = '[project]\nname="test"\n'
 
 
 def test_entry_point_exists() -> None:
-    """Verify pyproject_fmt is callable via subprocess."""
+    """Verify pypfmt is callable via subprocess."""
     result = subprocess.run(
-        ["uv", "run", "pyproject_fmt", "--version"],
+        ["uv", "run", "pypfmt", "--version"],
         capture_output=True,
         text=True,
         timeout=30,
     )
     assert result.returncode == 0
-    assert "pyproject_fmt" in result.stdout
+    assert "pypfmt" in result.stdout
 
 
 def test_precommit_fix_invocation(tmp_path: Path) -> None:
@@ -33,7 +33,7 @@ def test_precommit_fix_invocation(tmp_path: Path) -> None:
     toml_file.write_text(UNFORMATTED_TOML)
 
     result = subprocess.run(
-        ["uv", "run", "pyproject_fmt", str(toml_file)],
+        ["uv", "run", "pypfmt", str(toml_file)],
         capture_output=True,
         text=True,
         timeout=30,
@@ -50,7 +50,7 @@ def test_precommit_idempotency(tmp_path: Path) -> None:
 
     # First run: format in-place
     result1 = subprocess.run(
-        ["uv", "run", "pyproject_fmt", str(toml_file)],
+        ["uv", "run", "pypfmt", str(toml_file)],
         capture_output=True,
         text=True,
         timeout=30,
@@ -61,7 +61,7 @@ def test_precommit_idempotency(tmp_path: Path) -> None:
 
     # Second run: check mode on already-formatted file
     result2 = subprocess.run(
-        ["uv", "run", "pyproject_fmt", "--check", str(toml_file)],
+        ["uv", "run", "pypfmt", "--check", str(toml_file)],
         capture_output=True,
         text=True,
         timeout=30,
@@ -76,7 +76,7 @@ def test_precommit_check_mode_detects_unformatted(tmp_path: Path) -> None:
     toml_file.write_text(UNFORMATTED_TOML)
 
     result = subprocess.run(
-        ["uv", "run", "pyproject_fmt", "--check", str(toml_file)],
+        ["uv", "run", "pypfmt", "--check", str(toml_file)],
         capture_output=True,
         text=True,
         timeout=30,
@@ -99,7 +99,7 @@ def test_multiple_files_invocation(tmp_path: Path) -> None:
     file2.write_text(content2)
 
     result = subprocess.run(
-        ["uv", "run", "pyproject_fmt", str(file1), str(file2)],
+        ["uv", "run", "pypfmt", str(file1), str(file2)],
         capture_output=True,
         text=True,
         timeout=30,

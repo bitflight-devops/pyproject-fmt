@@ -9,7 +9,7 @@ from __future__ import annotations
 import shutil
 import subprocess
 
-from pyproject_fmt.config import TAPLO_OPTIONS
+from pypfmt.config import TAPLO_OPTIONS
 
 
 def format_toml(

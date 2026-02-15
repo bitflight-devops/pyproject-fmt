@@ -1,7 +1,7 @@
 """Pipeline orchestrator: validate -> sort -> format.
 
 Chains TOML validation, sorting, and formatting into a single
-str -> str transformation. This is the public API for pyproject_fmt.
+str -> str transformation. This is the public API for pypfmt.
 """
 
 from __future__ import annotations
@@ -9,8 +9,8 @@ from __future__ import annotations
 import tomllib
 from typing import TYPE_CHECKING
 
-from pyproject_fmt.formatter import format_toml
-from pyproject_fmt.sorter import sort_toml
+from pypfmt.formatter import format_toml
+from pypfmt.sorter import sort_toml
 
 if TYPE_CHECKING:
     from toml_sort.tomlsort import (

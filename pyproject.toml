@@ -1,5 +1,5 @@
 [project]
-name = "pyproject_fmt"
+name = "pypfmt"
 version = "0.1.0"
 description = "A Python package to sort and format pyproject.toml"
 readme = "README.md"
@@ -29,7 +29,7 @@ dependencies = [
 ]
 
 [project.scripts]
-pyproject_fmt = "pyproject_fmt.cli:app"
+pypfmt = "pypfmt.cli:app"
 
 [project.urls]
 Changelog = "https://github.com/bitflight-devops/pyproject-fmt/blob/main/CHANGELOG.md"
@@ -74,7 +74,7 @@ show_missing = true
 [tool.coverage.run]
 branch = true
 parallel = true
-source = ["src/pyproject_fmt"]
+source = ["src/pypfmt"]
 
 [tool.git-cliff]
 config = "cliff.toml"
@@ -87,7 +87,7 @@ include = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/pyproject_fmt"]
+packages = ["src/pypfmt"]
 
 # Matrix testing across Python versions
 [tool.hatch.envs.test]
@@ -131,7 +131,7 @@ select = [
 ]
 
 [tool.ruff.lint.isort]
-known-first-party = ["pyproject_fmt"]
+known-first-party = ["pypfmt"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = ["ARG001"]

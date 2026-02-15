@@ -1,7 +1,7 @@
-# pyproject-fmt
+# pypfmt
 
 [![CI](https://github.com/bitflight-devops/pyproject-fmt/actions/workflows/ci.yml/badge.svg)](https://github.com/bitflight-devops/pyproject-fmt/actions/workflows/ci.yml)
-[![PyPI version](https://badge.fury.io/py/pyproject_fmt.svg)](https://badge.fury.io/py/pyproject_fmt)
+[![PyPI version](https://badge.fury.io/py/pypfmt.svg)](https://badge.fury.io/py/pypfmt)
 [![codecov](https://codecov.io/gh/bitflight-devops/pyproject-fmt/branch/main/graph/badge.svg)](https://codecov.io/gh/bitflight-devops/pyproject-fmt)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
@@ -21,31 +21,31 @@ A Python package to sort and format pyproject.toml
 ## Installation
 
 ```bash
-pip install pyproject_fmt
+pip install pypfmt
 ```
 
 Or using uv (recommended):
 
 ```bash
-uv add pyproject_fmt
+uv add pypfmt
 ```
 
 ## Quick Start
 
 ```python
-import pyproject_fmt
+import pypfmt
 
-print(pyproject_fmt.__version__)
+print(pypfmt.__version__)
 ```
 
 ### CLI Usage
 
 ```bash
 # Show version
-pyproject_fmt --version
+pypfmt --version
 
 # Say hello
-pyproject_fmt hello World
+pypfmt hello World
 ```
 
 ## Development

@@ -1,6 +1,6 @@
-"""Sort and format configuration for pyproject_fmt.
+"""Sort and format configuration for pypfmt.
 
-Hardcoded defaults plus optional user overrides from [tool.pyproject-fmt].
+Hardcoded defaults plus optional user overrides from [tool.pypfmt].
 Override pattern modeled on ruff: extend-* adds to defaults, plain key replaces.
 """
 
@@ -17,7 +17,7 @@ from toml_sort.tomlsort import (
     SortOverrideConfiguration,
 )
 
-# Maps [tool.pyproject-fmt] TOML keys to the config field they control.
+# Maps [tool.pypfmt] TOML keys to the config field they control.
 # Serves as documentation and reference for error messages.
 SORT_KEY_MAP: dict[str, str] = {
     "sort-first": "first (replace)",
@@ -202,25 +202,25 @@ TAPLO_OPTIONS: tuple[str, ...] = (
 """taplo CLI -o key=value pairs for formatting."""
 
 _CONFLICT_WARNING = (
-    "warning: [tool.tomlsort] and [tool.pyproject-fmt] both present. "
+    "warning: [tool.tomlsort] and [tool.pypfmt] both present. "
     "toml-sort should not be used against pyproject.toml files when also "
-    "using pyproject-fmt, since results and ordering will be outside of "
-    "pyproject-fmt's control."
+    "using pypfmt, since results and ordering will be outside of "
+    "pypfmt's control."
 )
 
 
 def load_config(text: str) -> dict | None:
-    """Extract ``[tool.pyproject-fmt]`` from TOML text.
+    """Extract ``[tool.pypfmt]`` from TOML text.
 
     Pure extraction -- no merging logic. Returns the raw dict when the
     section exists, ``None`` when it doesn't.
     """
     data = tomllib.loads(text)
-    return data.get("tool", {}).get("pyproject-fmt", None)
+    return data.get("tool", {}).get("pypfmt", None)
 
 
 def check_config_conflict(text: str) -> str | None:
-    """Return a warning string if both tomlsort and pyproject-fmt config exist.
+    """Return a warning string if both tomlsort and pypfmt config exist.
 
     Returns ``None`` when there is no conflict or when the warning is
     suppressed via the ``PPF_HIDE_CONFLICT_WARNING`` environment variable.
@@ -229,7 +229,7 @@ def check_config_conflict(text: str) -> str | None:
     tool = data.get("tool", {})
     if (
         "tomlsort" in tool
-        and "pyproject-fmt" in tool
+        and "pypfmt" in tool
         and not os.environ.get("PPF_HIDE_CONFLICT_WARNING")
     ):
         return _CONFLICT_WARNING

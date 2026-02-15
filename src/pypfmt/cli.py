@@ -1,4 +1,4 @@
-"""Command-line interface for pyproject_fmt."""
+"""Command-line interface for pypfmt."""
 
 from __future__ import annotations
 
@@ -10,14 +10,14 @@ from typing import Annotated
 
 import typer
 
-from pyproject_fmt import __version__
-from pyproject_fmt.config import (
+from pypfmt import __version__
+from pypfmt.config import (
     MergedConfig,
     check_config_conflict,
     load_config,
     merge_config,
 )
-from pyproject_fmt.pipeline import format_pyproject
+from pypfmt.pipeline import format_pyproject
 
 _RED = "\033[31m"
 _GREEN = "\033[32m"
@@ -25,7 +25,7 @@ _CYAN = "\033[36m"
 _RESET = "\033[0m"
 
 app = typer.Typer(
-    name="pyproject_fmt",
+    name="pypfmt",
     help="Sort and format pyproject.toml files.",
     add_completion=False,
 )
@@ -34,7 +34,7 @@ app = typer.Typer(
 def _version_callback(value: bool) -> None:
     """Print version and exit."""
     if value:
-        typer.echo(f"pyproject_fmt {__version__}")
+        typer.echo(f"pypfmt {__version__}")
         raise typer.Exit()
 
 
@@ -64,7 +64,7 @@ def _print_diff(original: str, formatted: str, filename: str) -> None:
 def _load_and_warn(text: str) -> MergedConfig | None:
     """Load config from text, emit conflict warning, return merged config.
 
-    Returns a ``MergedConfig`` 5-tuple when ``[tool.pyproject-fmt]`` is
+    Returns a ``MergedConfig`` 5-tuple when ``[tool.pypfmt]`` is
     present, or ``None`` so the pipeline uses its hardcoded defaults.
 
     If the TOML is invalid, returns ``None`` -- the pipeline's own
