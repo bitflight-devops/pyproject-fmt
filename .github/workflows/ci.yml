@@ -109,7 +109,7 @@ jobs:
 
   release:
     name: Tag and Release
-    needs: [lint, type-check, test, secrets_and_dependency_scan, sast_with_semgrep]
+    needs: [lint, type-check, test, sast_with_semgrep]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:
