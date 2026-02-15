@@ -214,8 +214,8 @@ def test_merge_overrides_replace() -> None:
 def test_config_affects_pipeline_output() -> None:
     """Config overrides reach pipeline and change output ordering.
 
-    Default sort_first has "project" before "build-system".
-    With sort-first = ["build-system", "project"], build-system comes first.
+    Default sort_first has "build-system" before "project".
+    With sort-first = ["project", "build-system"], project comes first.
     """
     from pyproject_fmt.pipeline import format_pyproject
 
@@ -228,14 +228,14 @@ def test_config_affects_pipeline_output() -> None:
         'build-backend = "hatchling.build"\n'
     )
 
-    # Default ordering: project before build-system
+    # Default ordering: build-system before project
     default_result = format_pyproject(toml_input)
     default_project_pos = default_result.index("[project]")
     default_build_pos = default_result.index("[build-system]")
-    assert default_project_pos < default_build_pos
+    assert default_build_pos < default_project_pos
 
-    # Custom ordering: build-system before project
-    user = {"sort-first": ["build-system", "project"]}
+    # Custom ordering: project before build-system
+    user = {"sort-first": ["project", "build-system"]}
     sort_cfg, sort_overrides, comment_cfg, format_cfg, taplo_opts = merge_config(user)
     custom_result = format_pyproject(
         toml_input,
@@ -247,4 +247,4 @@ def test_config_affects_pipeline_output() -> None:
     )
     custom_project_pos = custom_result.index("[project]")
     custom_build_pos = custom_result.index("[build-system]")
-    assert custom_build_pos < custom_project_pos
+    assert custom_project_pos < custom_build_pos
