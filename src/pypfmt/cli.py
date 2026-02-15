@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import difflib
+import io
+import select
 import sys
 import tomllib
 from pathlib import Path
@@ -23,6 +25,8 @@ _RED = "\033[31m"
 _GREEN = "\033[32m"
 _CYAN = "\033[36m"
 _RESET = "\033[0m"
+
+_STDIN_TIMEOUT = 0.1  # seconds to wait for stdin data in non-TTY mode
 
 app = typer.Typer(
     name="pypfmt",
@@ -100,6 +104,39 @@ def _format_with_config(text: str, merged: MergedConfig | None) -> str:
     )
 
 
+def _stdin_has_data() -> bool:
+    """Check whether stdin has data available without blocking.
+
+    Uses ``select.select`` with a short timeout to detect whether piped
+    data is ready on stdin.  This prevents the CLI from hanging when
+    invoked without files in non-TTY environments (e.g. subprocess calls,
+    CI runners, editor integrations) where ``isatty()`` returns ``False``
+    but no data is actually piped.
+
+    Returns:
+        ``True`` if stdin has data ready to read, ``False`` otherwise.
+
+    Note:
+        ``select.select`` requires a real file descriptor.  If stdin is a
+        wrapper without ``fileno()`` (e.g. inside test harnesses), we fall
+        back to ``True`` so the caller proceeds to ``stdin.read()``.
+
+        On Windows, ``select.select`` does not support non-socket file
+        descriptors, so this also falls back to ``True``.  Windows callers
+        that invoke pypfmt without files and without piped input will
+        still block.
+    """
+    if sys.platform == "win32":
+        return True  # pragma: no cover
+    try:
+        readable, _, _ = select.select([sys.stdin], [], [], _STDIN_TIMEOUT)
+    except (ValueError, OSError, io.UnsupportedOperation):
+        # stdin doesn't support fileno() (e.g. test harness wrappers)
+        # or the fd is closed/invalid -- assume data is available
+        return True
+    return bool(readable)
+
+
 def _process_file(filepath: str, *, check: bool, diff: bool) -> int:
     """Process a single file through the formatting pipeline.
 
@@ -171,7 +208,17 @@ def main(
 ) -> None:
     """Sort and format pyproject.toml files."""
     if not files:
-        # Stdin mode
+        if sys.stdin.isatty():
+            # Interactive terminal with no files -- show usage
+            typer.echo("error: no input files provided", err=True)
+            typer.echo("Usage: pypfmt [OPTIONS] [FILES]...", err=True)
+            typer.echo("  or pipe input: cat pyproject.toml | pypfmt", err=True)
+            raise typer.Exit(code=2)
+        # Non-TTY: check if stdin actually has data available
+        if not _stdin_has_data():
+            typer.echo("error: no input files provided", err=True)
+            raise typer.Exit(code=2)
+        # Stdin mode (piped input available)
         text = sys.stdin.read()
         merged = _load_and_warn(text)
         try:
