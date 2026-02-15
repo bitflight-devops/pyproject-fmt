@@ -73,10 +73,10 @@ Plans:
   3. Pipeline correctly preserves array element order for arrays with positional semantics (e.g. pytest addopts)
   4. All existing tests pass against the restored golden file
   5. Pipeline idempotency holds: `pipeline(pipeline(x)) == pipeline(x)` against the restored golden file
-**Plans:** TBD (needs `/gsd:plan-phase 3.1`)
+**Plans:** 1 plan
 
 Plans:
-- [ ] (not yet planned)
+- [ ] 03.1-01-PLAN.md -- Restore golden file, fix input fixture arrays, correct pipeline sort configuration
 
 ## Progress
 
