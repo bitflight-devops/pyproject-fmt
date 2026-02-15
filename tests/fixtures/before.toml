@@ -34,11 +34,11 @@ keywords = [
 ]
 requires-python = ">=3.11,<3.14"
 dependencies = [
+    "gitpython>=3.1.45",
+    "mypy>=1.17.1",
     "basedpyright>=1.33.0",
     "ruff>=0.12.10",
     "typer>=0.19.2",
-    "gitpython>=3.1.45",
-    "mypy>=1.17.1",
 
 ]
 
@@ -256,6 +256,9 @@ unfixable = ["F401"]
 
 [tool.ruff.lint.per-file-ignores]
 "**/tests/**" = [
+    "S",  # Security checks not needed in tests
+    "D",  # Docstring requirements relaxed for tests
+    "E501", # Line length relaxed for test data
     "ANN",  # Type annotations optional for test fixtures/methods
     "DOC",  # Docstring content requirements relaxed
     "PLC",  # Local imports acceptable in test helpers
@@ -264,9 +267,6 @@ unfixable = ["F401"]
     "EXE",  # Shebang executable check skipped for PEP723 test files
     "N",  # camelCase in test names acceptable when testing API fields
     "T",  # print() statements are intentional for CI output visibility
-    "S",  # Security checks not needed in tests
-    "D",  # Docstring requirements relaxed for tests
-    "E501", # Line length relaxed for test data
     "BLE", # Blind exception catching acceptable in test utilities
 ]
 "typings/**" = ["N", "ANN", "A"]
