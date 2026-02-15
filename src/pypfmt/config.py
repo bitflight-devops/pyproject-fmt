@@ -50,9 +50,10 @@ def get_sort_config() -> SortConfiguration:
     Only arrays with explicit inline_arrays=True overrides are sorted
     alphabetically (classifiers, extend-select, ignore, dependency-groups).
 
-    Global table_keys=False preserves key order within tables by default.
-    Tables needing first-list ordering (project, build-system) must have
-    table_keys=True on their override for the first list to take effect.
+    Global table_keys=True sorts keys alphabetically within all tables.
+    Tables with a ``first`` list get those keys placed first in the
+    specified order, then remaining keys sorted alphabetically.
+    Exceptions (tomlsort section) use table_keys=False overrides.
 
     The root first list controls only ROOT-level table ordering.
     Sub-table ordering (e.g., tool.ruff vs tool.pytest) is controlled
@@ -61,13 +62,13 @@ def get_sort_config() -> SortConfiguration:
     """
     return SortConfiguration(
         tables=True,
-        table_keys=False,
+        table_keys=True,
         inline_tables=False,
         inline_arrays=False,
         ignore_case=False,
         first=[
-            "build-system",
             "project",
+            "build-system",
             "dependency-groups",
         ],
     )
@@ -76,33 +77,34 @@ def get_sort_config() -> SortConfiguration:
 def get_sort_overrides() -> dict[str, SortOverrideConfiguration]:
     """Return per-table sort override configurations.
 
-    Global defaults: inline_arrays=False (preserve order), table_keys=False
-    (preserve key order). Overrides selectively enable sorting where needed.
+    Global defaults: table_keys=True (sort keys alphabetically),
+    inline_arrays=False (preserve array element order).
 
     The first list on parent-table overrides controls sub-table ordering.
     This mirrors how toml-sort CLI's parse_sort_first decomposes dotted
     keys: "tool.ruff" becomes first=["ruff"] on the "tool" override.
 
-    - table_keys=True on build-system/project enables first-list key ordering
+    inline_arrays=True on explicit ARRAY PATH overrides enables alphabetical
+    sorting of array elements. Table-level inline_arrays does NOT cascade
+    to arrays within that table; each sortable array needs its own override.
+
+    - first list on build-system/project controls key ordering
     - first list on "tool" override controls tool sub-table ordering
-    - first=["*"] on sub-tool overrides ensures sub-sub-tables sort correctly
-    - inline_arrays=True on specific array paths enables alphabetical sorting
+    - first lists on sub-tool overrides control sub-sub-table ordering
     - tool.tomlsort overrides explicitly preserve its own config section
     """
     return {
-        # Tables needing first-list key ordering (table_keys=True required
-        # for the first list to work with global table_keys=False)
+        # -- Root-level table overrides --
         "build-system": SortOverrideConfiguration(
-            table_keys=True,
             first=["requires", "build-backend"],
         ),
         "project": SortOverrideConfiguration(
-            table_keys=True,
             first=[
                 "name",
-                "dynamic",
+                "version",
                 "description",
                 "readme",
+                "dynamic",
                 "authors",
                 "maintainers",
                 "license",
@@ -113,13 +115,44 @@ def get_sort_overrides() -> dict[str, SortOverrideConfiguration]:
                 "*",
             ],
         ),
-        # Tool sub-table ordering (mirrors parse_sort_first decomposition)
+        # -- Explicit array path overrides (inline_arrays=True) --
+        # build-system arrays
+        "build-system.requires": SortOverrideConfiguration(inline_arrays=True),
+        # project arrays (keywords excluded: positional)
+        "project.classifiers": SortOverrideConfiguration(inline_arrays=True),
+        "project.dependencies": SortOverrideConfiguration(inline_arrays=True),
+        # dependency-groups arrays
+        "dependency-groups.*": SortOverrideConfiguration(inline_arrays=True),
+        # ruff arrays
+        "tool.ruff.src": SortOverrideConfiguration(inline_arrays=True),
+        "tool.ruff.lint.extend-select": SortOverrideConfiguration(
+            inline_arrays=True,
+        ),
+        "tool.ruff.lint.ignore": SortOverrideConfiguration(inline_arrays=True),
+        "tool.ruff.lint.per-file-ignores.*": SortOverrideConfiguration(
+            inline_arrays=True,
+        ),
+        # pytest arrays (addopts excluded: positional)
+        "tool.pytest.ini_options.markers": SortOverrideConfiguration(
+            inline_arrays=True,
+        ),
+        # semantic_release arrays
+        "tool.semantic_release.commit_parser_options.allowed_tags": (
+            SortOverrideConfiguration(inline_arrays=True)
+        ),
+        "tool.semantic_release.commit_parser_options.patch_tags": (
+            SortOverrideConfiguration(inline_arrays=True)
+        ),
+        # -- Tool sub-table ordering --
         "tool": SortOverrideConfiguration(
             first=[
+                "hatch",
                 "git-cliff",
                 "pypis_delivery_service",
-                "ty",
                 "uv",
+                "pytest",
+                "coverage",
+                "ty",
                 "ruff",
                 "mypy",
                 "pyright",
@@ -127,33 +160,30 @@ def get_sort_overrides() -> dict[str, SortOverrideConfiguration]:
                 "pylint",
                 "isort",
                 "black",
-                "pytest",
-                "coverage",
                 "semantic_release",
-                "hatch",
                 "*",
                 "tomlsort",
             ],
         ),
-        # Sub-tool table ordering matching golden file specification.
-        # toml-sort sorts sub-tables alphabetically by default (tables=True).
-        # These first lists override to match the golden file order.
+        # Sub-tool table ordering matching spec
         "tool.ruff.lint": SortOverrideConfiguration(
-            first=["per-file-ignores", "pycodestyle", "pydocstyle", "mccabe"],
+            first=[
+                "flake8-quotes",
+                "isort",
+                "mccabe",
+                "per-file-ignores",
+                "pycodestyle",
+                "pydocstyle",
+            ],
         ),
         "tool.coverage": SortOverrideConfiguration(
-            first=["run", "report"],
+            first=["report", "run"],
         ),
         "tool.hatch": SortOverrideConfiguration(
-            first=["version", "build"],
+            first=["build", "version"],
         ),
-        # Arrays that SHOULD be sorted alphabetically
-        "project.classifiers": SortOverrideConfiguration(inline_arrays=True),
-        "tool.ruff.lint.extend-select": SortOverrideConfiguration(inline_arrays=True),
-        "tool.ruff.lint.ignore": SortOverrideConfiguration(inline_arrays=True),
-        # Dependency groups: sort array elements alphabetically
-        "dependency-groups.*": SortOverrideConfiguration(inline_arrays=True),
-        # tomlsort section: preserve as-is (no sorting)
+        # -- Preserve-as-is overrides --
+        # tomlsort section: preserve its own config section
         "tool.tomlsort": SortOverrideConfiguration(
             table_keys=False,
             inline_arrays=False,

@@ -1,12 +1,8 @@
-[build-system]
-requires = ["hatchling", "hatch-vcs"]
-build-backend = "hatchling.build"
-
 [project]
 name = "claude-linting-hook"
-dynamic = ["version"]
 description = "A robust, fully portable Claude Code hook that automatically detects project configuration and applies appropriate linting tools based on modified files."
 readme = "README.md"
+dynamic = ["version"]
 authors = [{ name = "Jamie Nelson", email = "jamie.nelson@assaabloy.com" }]
 maintainers = [{ name = "Jamie Nelson", email = "jamie.nelson@assaabloy.com" }]
 license = { text = "MIT" }
@@ -32,12 +28,26 @@ keywords = [
 ]
 requires-python = ">=3.11,<3.14"
 dependencies = [
+    "basedpyright>=1.37.4",
     "gitpython>=3.1.45",
-    "mypy>=1.17.1",
-    "basedpyright>=1.33.0",
-    "ruff>=0.12.10",
-    "typer>=0.19.2",
+    "mypy>=1.19.1",
+    "ruff>=0.15.0",
+    "ty>=0.0.15",
+    "typer>=0.21.1",
 ]
+
+[project.scripts]
+claude-lint-hook = "claude_lint_hook.main:main"
+
+[project.urls]
+"Bug Tracker" = "https://sourcery.assaabloy.net/jamnel/claude-linting-hook/-/issues"
+Documentation = "https://sourcery.assaabloy.net/jamnel/claude-linting-hook/-/blob/main/README.md"
+Homepage = "https://sourcery.assaabloy.net/jamnel/claude-linting-hook"
+Repository = "https://sourcery.assaabloy.net/jamnel/claude-linting-hook"
+
+[build-system]
+requires = ["hatch-vcs", "hatchling"]
+build-backend = "hatchling.build"
 
 [dependency-groups]
 dev = [
@@ -53,12 +63,72 @@ dev = [
     "pytest>=9.0.2",
     "python-dotenv>=1.2.1",
     "tiktoken>=0.12.0",
-    "toml-sort>=0.24.3",
     "uv-sort>=0.7.0",
 ]
 
+[tool.hatch.build.targets.sdist]
+include = ["claude_lint_hook.py", "pyproject.toml", "README.md"]
+
+[tool.hatch.build.targets.sdist.hooks.custom]
+path = "scripts/hatch_build.py"
+
+[tool.hatch.build.targets.wheel]
+include = ["claude_lint_hook.py"]
+
+[tool.hatch.version]
+source = "vcs"
+
 [tool.git-cliff]
 config = "cliff.toml"
+
+[tool.uv]
+
+[[tool.uv.index]]
+default = true
+name = "pypi"
+url = "https://pypi.org/simple"
+
+[[tool.uv.index]]
+default = false
+explicit = true
+name = "gitlab"
+url = "https://sourcery.assaabloy.net/api/v4/groups/aehgfw/-/packages/pypi/simple"
+
+[tool.pytest.ini_options]
+addopts = [
+    "--tb=short",
+    "--strict-markers",
+    "--strict-config",
+    "-n",
+    "auto",
+    "--dist",
+    "loadgroup",
+]
+markers = [
+    "demos: marks tests as demonstration tests",
+    "e2e: marks tests as end-to-end tests",
+    "integration: marks tests as integration tests",
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "unit: marks tests as unit tests",
+]
+pythonpath = ["."]
+testpaths = ["tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if __name__ == .__main__.:",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+]
+fail_under = 70
+show_missing = true
+
+[tool.coverage.run]
+omit = ["tests/*", "*/tests/*", ".gitlab/scripts/*"]
+source = ["claude_lint_hook.py"]
 
 [tool.ty.environment]
 root = ["./"]
@@ -75,30 +145,18 @@ unresolved-attribute = "warn"
 [tool.ty.src]
 include = ["**/*.py", "*.py"]
 
-[tool.uv]
-
-[[tool.uv.index]]
-default = true
-name = "pypi"
-url = "https://pypi.org/simple"
-
-[[tool.uv.index]]
-default = false
-explicit = true
-name = "gitlab"
-url = "https://sourcery.assaabloy.net/api/v4/groups/aehgfw/-/packages/pypi/simple"
-
 [tool.ruff]
-src = ["packages", "scripts", "tests", "typings", ".gitlab"]
-line-length = 120
-target-version = "py311"
 fix = true
+line-length = 120
+src = [".gitlab", "packages", "scripts", "tests", "typings"]
+target-version = "py311"
 unsafe-fixes = true
 
 [tool.ruff.format]
 docstring-code-format = true
-quote-style = "double"
 line-ending = "lf"
+preview = true
+quote-style = "double"
 skip-magic-trailing-comma = true
 
 [tool.ruff.lint]
@@ -157,8 +215,7 @@ ignore = [
     "E117",    # Over-indented for visual indent
     "E203",    # whitespace before ':'
     "E402",    # todo: use noqa per line
-    "E501",    # Line length exceeds maximum limit
-    "E501",    # Line too long ({width} > {limit})
+    "E501",    # Line too long / line length exceeds limit
     "EXE003",  # Shebang should contain python, pytest, or uv run (doesn't handle global arguments)
     "PLR0913", # Too many arguments - acceptable for internal APIs
     "PLR6301", # Method could be function - acceptable for API design
@@ -173,55 +230,51 @@ ignore = [
     "T201",    # print() statements are intentional for CI output visibility
     "TRY003",  # Exception message should not be too long
 ]
+preview = true
 unfixable = ["F401"]
 
+[tool.ruff.lint.flake8-quotes]
+docstring-quotes = "double"
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+force-single-line = false
+force-wrap-aliases = false
+required-imports = ["from __future__ import annotations"]
+split-on-trailing-comma = false
+
+[tool.ruff.lint.mccabe]
+max-complexity = 12
+
 [tool.ruff.lint.per-file-ignores]
-"**/tests/**" = [
-    "S",    # Security checks not needed in tests
-    "D",    # Docstring requirements relaxed for tests
-    "E501", # Line length relaxed for test data
-    "ANN",  # Type annotations optional for test fixtures/methods
-    "DOC",  # Docstring content requirements relaxed
-    "PLC",  # Local imports acceptable in test helpers
-    "SLF",  # Private name imports acceptable for testing internals
-    "PLR",  # Testing private methods is valid test pattern
-    "EXE",  # Shebang executable check skipped for PEP723 test files
-    "N",    # camelCase in test names acceptable when testing API fields
-    "T",    # print() statements are intentional for CI output visibility
-    "BLE",  # Blind exception catching acceptable in test utilities
-]
-"typings/**" = ["N", "ANN", "A"]
 "**/scripts/**" = [
     "T201", # print() statements are intentional for CI output visibility
 ]
-# Claude Code hook implementation has special constraints:
-# - Hook protocol requires complex entry points (main, _handle_connection, _run_singleton_server)
-# - API response dataclasses must use camelCase to match Claude Code JSON protocol
-# - Backward compatibility methods delegate to private methods by design
-# - File locking requires defensive exception handling for robustness
-# - Platform-specific code (ctypes) requires conditional imports
-"claude_lint_hook.py" = [
-    "PLR0911", # Complex functions justified: socket handling requires many return paths
-    "PLR0912", # Complex functions justified: hook protocol entry points
-    "PLR0915", # Complex functions justified: singleton server and main entry
-    "C901",    # Complexity justified: protocol-mandated control flow
-    "N815",    # camelCase REQUIRED: Claude Hook API field names must match protocol
-    "BLE001",  # Blind exceptions justified: file locking and cleanup require defensive handling
-    "PLC0415", # Deferred imports justified: platform-specific (ctypes), startup perf (argparse, select, threading)
-    "DOC201",  # Returns sections: simplified docstrings acceptable for internal helpers
-    "ANN401",  # Any types: required for signal handlers (FrameType) and context managers
-    "PYI036",  # __exit__ annotations: standard Python pattern using object
-    "SLF001",  # Private member access: backward compat delegations and main() logging initialization by design
+"**/tests/**" = [
+    "ANN",  # Type annotations optional for test fixtures/methods
+    "D",    # Docstring requirements relaxed for tests
+    "DOC",  # Docstring content requirements relaxed
+    "E501", # Line length relaxed for test data
+    "EXE",  # Shebang executable check skipped for PEP723 test files
+    "N",    # camelCase in test names acceptable when testing API fields
+    "PLC",  # Local imports acceptable in test helpers
+    "PLR",  # Testing private methods is valid test pattern
+    "S",    # Security checks not needed in tests
+    "SLF",  # Private name imports acceptable for testing internals
+    "T",    # print() statements are intentional for CI output visibility
 ]
+# Claude Code hook implementation has special constraints:
+# - API response dataclasses must use camelCase to match Claude Code JSON protocol
+"claude_lint_hook.py" = [
+    "N815", # camelCase REQUIRED: Claude Hook API field names must match protocol
+]
+"typings/**" = ["A", "ANN", "N"]
 
 [tool.ruff.lint.pycodestyle]
 max-line-length = 120
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
-
-[tool.ruff.lint.mccabe]
-max-complexity = 12
 
 [tool.mypy]
 exclude = [".*"]
@@ -242,53 +295,18 @@ disable = """
 """
 max-line-length = 120
 
-[tool.pytest.ini_options]
-pythonpath = ["."]
-testpaths = ["tests"]
-addopts = [
-    "--tb=short",
-    "--strict-markers",
-    "--strict-config",
-    "-n",
-    "auto",
-    "--dist",
-    "loadgroup",
-]
-markers = [
-    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
-    "unit: marks tests as unit tests",
-    "integration: marks tests as integration tests",
-    "e2e: marks tests as end-to-end tests",
-    "demos: marks tests as demonstration tests",
-]
-
-[tool.coverage.run]
-source = ["claude_lint_hook.py"]
-omit = ["tests/*", "*/tests/*", ".gitlab/scripts/*"]
-
-[tool.coverage.report]
-exclude_lines = [
-    "pragma: no cover",
-    "def __repr__",
-    "if __name__ == .__main__.:",
-    "raise AssertionError",
-    "raise NotImplementedError",
-    "if TYPE_CHECKING:",
-]
-
 [tool.semantic_release]
-version_toml = []
-major_on_zero = true
 allow_zero_version = true
-tag_format = "v{version}"
 build_command = "uv build"
+major_on_zero = true
+tag_format = "v{version}"
+version_toml = []
 
 [tool.semantic_release.branches.main]
 match = "(main|master)"
 prerelease = false
 
 [tool.semantic_release.commit_parser_options]
-patch_tags = ["fix", "refactor", "perf"]
 allowed_tags = [
     "build",
     "chore",
@@ -297,103 +315,9 @@ allowed_tags = [
     "feat",
     "fix",
     "perf",
-    "style",
     "refactor",
+    "style",
     "test",
 ]
 minor_tags = ["feat"]
-
-[tool.hatch.version]
-source = "vcs"
-
-[tool.hatch.build.targets.sdist]
-include = ["claude_lint_hook.py", "pyproject.toml", "README.md"]
-
-[tool.hatch.build.targets.sdist.hooks.custom]
-path = "scripts/hatch_build.py"
-
-[tool.hatch.build.targets.wheel]
-include = ["claude_lint_hook.py"]
-
-[tool.tomlsort]
-in_place = true
-sort_table_keys = true
-spaces_indent_inline_array = 4
-trailing_comma_inline_array = true
-sort_first = [
-    "project",
-    "project.*",
-    "build-system",
-    "dependency-groups",
-    "tool.hatch",
-    "tool.git-cliff",
-    "tool.pypis_delivery_service",
-    "tool.uv",
-    "tool.pytest",
-    "tool.coverage",
-    "tool.ty",
-    "tool.ruff",
-    "tool.mypy",
-    "tool.pyright",
-    "tool.basedpyright",
-    "tool.pylint",
-    "tool.isort",
-    "tool.black",
-    "tool.semantic_release",
-    "tool.*",
-    "tool.tomlsort",
-]
-
-[tool.tomlsort.overrides."build-system"]
-first = ["requires", "build-backend"]
-inline_arrays = true
-
-[tool.tomlsort.overrides."dependency-groups"]
-inline_arrays = true
-
-[tool.tomlsort.overrides."project"]
-inline_arrays = true
-first = [
-    "name",
-    "version",
-    "description",
-    "readme",
-    "dynamic",
-    "authors",
-    "maintainers",
-    "license",
-    "classifiers",
-    "keywords",
-    "requires-python",
-    "dependencies",
-]
-
-[tool.tomlsort.overrides."tool.pytest"]
-inline_arrays = true
-
-[tool.tomlsort.overrides."tool.pytest.addopts"]
-table_keys = false
-inline_arrays = false
-
-[tool.tomlsort.overrides."tool.ruff"]
-inline_arrays = true
-
-[tool.tomlsort.overrides."tool.ruff.*"]
-inline_arrays = true
-
-[tool.tomlsort.overrides."tool.semantic_release.commit_parser_options"]
-inline_arrays = true
-
-[tool.tomlsort.overrides."tool.tomlsort"]
-table_keys = false
-inline_arrays = false
-
-[tool.tomlsort.overrides."tool.tomlsort.*"]
-table_keys = false
-inline_arrays = false
-
-[tool.tomlsort.overrides."tool.ty"]
-inline_arrays = true
-
-[tool.tomlsort.overrides."tool.ty.*"]
-inline_arrays = true
+patch_tags = ["fix", "perf", "refactor"]
