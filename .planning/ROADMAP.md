@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Core Pipeline** - Sort and format pyproject.toml files with opinionated defaults, proven correct via golden file comparison, with data loss detection and comment/order fidelity verification
 - [x] **Phase 2: CLI and Configuration** - User-facing command-line interface with check/diff modes and configurable overrides
 - [x] **Phase 3: Integration** - Pre-commit hook support and pip-installable distribution
-- [ ] **Phase 3.1: Golden File Correction** (INSERTED) - Restore user-provided golden file, identify pipeline deviations, fix pipeline to match specification
+- [x] **Phase 3.1: Golden File Correction** (INSERTED) - Restore user-provided golden file, identify pipeline deviations, fix pipeline to match specification
 
 ## Phase Details
 
@@ -76,7 +76,7 @@ Plans:
 **Plans:** 1 plan
 
 Plans:
-- [ ] 03.1-01-PLAN.md -- Restore golden file, fix input fixture arrays, correct pipeline sort configuration
+- [x] 03.1-01-PLAN.md -- Restore golden file, fix input fixture arrays, correct pipeline sort configuration
 
 ## Progress
 
@@ -88,4 +88,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 3.1
 | 1. Core Pipeline | 2/2 | Complete | 2026-02-13 |
 | 2. CLI and Configuration | 2/2 | Complete | 2026-02-14 |
 | 3. Integration | 1/1 | Complete | 2026-02-14 |
-| 3.1. Golden File Correction | 0/? | Not started | - |
+| 3.1. Golden File Correction | 1/1 | Complete | 2026-02-14 |
