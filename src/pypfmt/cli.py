@@ -162,7 +162,11 @@ def _process_file(filepath: str, *, check: bool, diff: bool) -> int:
         typer.echo(f"error: {filepath}: permission denied", err=True)
         return 1
 
-    merged = _load_and_warn(text)
+    try:
+        merged = _load_and_warn(text)
+    except ValueError as exc:
+        typer.echo(f"error: {filepath}: {exc}", err=True)
+        return 1
 
     try:
         result = _format_with_config(text, merged)
@@ -207,7 +211,11 @@ def _process_stdin(*, check: bool, diff: bool) -> int:
         1 when check mode detects unformatted content or on parse error.
     """
     text = sys.stdin.read()
-    merged = _load_and_warn(text)
+    try:
+        merged = _load_and_warn(text)
+    except ValueError as exc:
+        typer.echo(f"error: stdin: {exc}", err=True)
+        return 1
     try:
         result = _format_with_config(text, merged)
     except tomllib.TOMLDecodeError as exc:
