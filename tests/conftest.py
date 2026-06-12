@@ -4,11 +4,20 @@ from pathlib import Path
 
 import pytest
 
+from pypfmt.pipeline import format_pyproject
 
-@pytest.fixture
-def sample_data() -> dict[str, str]:
-    """Provide sample data for tests."""
-    return {"key": "value"}
+_UNFORMATTED_TOML = '[project]\nname="test"\n'
+
+
+@pytest.fixture(scope="session")
+def formatted_toml() -> str:
+    """Return a true fixed point of the pipeline, computed once per session.
+
+    Using a session-scoped fixture ensures that if format_pyproject raises
+    during setup, pytest attributes the failure to the fixture rather than
+    to every test that uses it.
+    """
+    return format_pyproject(_UNFORMATTED_TOML)
 
 
 @pytest.fixture
