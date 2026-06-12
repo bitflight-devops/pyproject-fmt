@@ -36,7 +36,8 @@ def _flatten_dict(data: dict[str, Any], prefix: str = "") -> dict[str, Any]:
             if has_dicts:
                 for i, item in enumerate(value):
                     if isinstance(item, dict):
-                        result.update(_flatten_dict(cast("dict[str, Any]", item), f"{full_key}[{i}]"))
+                        typed_item = cast("dict[str, Any]", item)
+                        result.update(_flatten_dict(typed_item, f"{full_key}[{i}]"))
                     else:
                         result[f"{full_key}[{i}]"] = item
             else:
