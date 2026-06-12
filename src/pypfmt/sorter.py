@@ -6,6 +6,8 @@ This is the first stage of the pipeline: sort tables and keys.
 
 from __future__ import annotations
 
+__all__ = ["sort_toml"]
+
 from typing import TYPE_CHECKING
 
 from toml_sort import TomlSort

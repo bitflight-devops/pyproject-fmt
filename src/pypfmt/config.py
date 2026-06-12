@@ -6,9 +6,22 @@ Override pattern modeled on ruff: extend-* adds to defaults, plain key replaces.
 
 from __future__ import annotations
 
+__all__ = [
+    "TAPLO_OPTIONS",
+    "MergedConfig",
+    "check_config_conflict",
+    "get_comment_config",
+    "get_format_config",
+    "get_sort_config",
+    "get_sort_overrides",
+    "load_config",
+    "merge_config",
+]
+
 import dataclasses
 import os
 import tomllib
+from typing import TYPE_CHECKING, Any, cast
 
 from toml_sort.tomlsort import (
     CommentConfiguration,
@@ -16,6 +29,9 @@ from toml_sort.tomlsort import (
     SortConfiguration,
     SortOverrideConfiguration,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable, Mapping
 
 # Maps [tool.pypfmt] TOML keys to the config field they control.
 # Serves as documentation and reference for error messages.
@@ -74,6 +90,109 @@ def get_sort_config() -> SortConfiguration:
     )
 
 
+_SORT_OVERRIDES: dict[str, SortOverrideConfiguration] = {
+    # -- Root-level table overrides --
+    "build-system": SortOverrideConfiguration(
+        first=["requires", "build-backend"],
+    ),
+    "project": SortOverrideConfiguration(
+        first=[
+            "name",
+            "version",
+            "description",
+            "readme",
+            "dynamic",
+            "authors",
+            "maintainers",
+            "license",
+            "classifiers",
+            "keywords",
+            "requires-python",
+            "dependencies",
+            "*",
+        ],
+    ),
+    # -- Explicit array path overrides (inline_arrays=True) --
+    # build-system arrays
+    "build-system.requires": SortOverrideConfiguration(inline_arrays=True),
+    # project arrays (keywords excluded: positional)
+    "project.classifiers": SortOverrideConfiguration(inline_arrays=True),
+    "project.dependencies": SortOverrideConfiguration(inline_arrays=True),
+    # dependency-groups arrays
+    "dependency-groups.*": SortOverrideConfiguration(inline_arrays=True),
+    # ruff arrays
+    "tool.ruff.src": SortOverrideConfiguration(inline_arrays=True),
+    "tool.ruff.lint.extend-select": SortOverrideConfiguration(
+        inline_arrays=True,
+    ),
+    "tool.ruff.lint.ignore": SortOverrideConfiguration(inline_arrays=True),
+    "tool.ruff.lint.per-file-ignores.*": SortOverrideConfiguration(
+        inline_arrays=True,
+    ),
+    # pytest arrays (addopts excluded: positional)
+    "tool.pytest.ini_options.markers": SortOverrideConfiguration(
+        inline_arrays=True,
+    ),
+    # semantic_release arrays
+    "tool.semantic_release.commit_parser_options.allowed_tags": (
+        SortOverrideConfiguration(inline_arrays=True)
+    ),
+    "tool.semantic_release.commit_parser_options.patch_tags": (
+        SortOverrideConfiguration(inline_arrays=True)
+    ),
+    # -- Tool sub-table ordering --
+    "tool": SortOverrideConfiguration(
+        first=[
+            "hatch",
+            "git-cliff",
+            "pypis_delivery_service",
+            "uv",
+            "pytest",
+            "coverage",
+            "ty",
+            "ruff",
+            "mypy",
+            "pyright",
+            "basedpyright",
+            "pylint",
+            "isort",
+            "black",
+            "semantic_release",
+            "*",
+            "tomlsort",
+        ],
+    ),
+    # Sub-tool table ordering matching spec
+    "tool.ruff.lint": SortOverrideConfiguration(
+        first=[
+            "flake8-quotes",
+            "isort",
+            "mccabe",
+            "per-file-ignores",
+            "pycodestyle",
+            "pydocstyle",
+        ],
+    ),
+    "tool.coverage": SortOverrideConfiguration(
+        first=["report", "run"],
+    ),
+    "tool.hatch": SortOverrideConfiguration(
+        first=["build", "version"],
+    ),
+    # -- Preserve-as-is overrides --
+    # tomlsort section: preserve its own config section
+    "tool.tomlsort": SortOverrideConfiguration(
+        table_keys=False,
+        inline_arrays=False,
+        first=["*"],
+    ),
+    "tool.tomlsort.*": SortOverrideConfiguration(
+        table_keys=False,
+        inline_arrays=False,
+    ),
+}
+
+
 def get_sort_overrides() -> dict[str, SortOverrideConfiguration]:
     """Return per-table sort override configurations.
 
@@ -93,107 +212,7 @@ def get_sort_overrides() -> dict[str, SortOverrideConfiguration]:
     - first lists on sub-tool overrides control sub-sub-table ordering
     - tool.tomlsort overrides explicitly preserve its own config section
     """
-    return {
-        # -- Root-level table overrides --
-        "build-system": SortOverrideConfiguration(
-            first=["requires", "build-backend"],
-        ),
-        "project": SortOverrideConfiguration(
-            first=[
-                "name",
-                "version",
-                "description",
-                "readme",
-                "dynamic",
-                "authors",
-                "maintainers",
-                "license",
-                "classifiers",
-                "keywords",
-                "requires-python",
-                "dependencies",
-                "*",
-            ],
-        ),
-        # -- Explicit array path overrides (inline_arrays=True) --
-        # build-system arrays
-        "build-system.requires": SortOverrideConfiguration(inline_arrays=True),
-        # project arrays (keywords excluded: positional)
-        "project.classifiers": SortOverrideConfiguration(inline_arrays=True),
-        "project.dependencies": SortOverrideConfiguration(inline_arrays=True),
-        # dependency-groups arrays
-        "dependency-groups.*": SortOverrideConfiguration(inline_arrays=True),
-        # ruff arrays
-        "tool.ruff.src": SortOverrideConfiguration(inline_arrays=True),
-        "tool.ruff.lint.extend-select": SortOverrideConfiguration(
-            inline_arrays=True,
-        ),
-        "tool.ruff.lint.ignore": SortOverrideConfiguration(inline_arrays=True),
-        "tool.ruff.lint.per-file-ignores.*": SortOverrideConfiguration(
-            inline_arrays=True,
-        ),
-        # pytest arrays (addopts excluded: positional)
-        "tool.pytest.ini_options.markers": SortOverrideConfiguration(
-            inline_arrays=True,
-        ),
-        # semantic_release arrays
-        "tool.semantic_release.commit_parser_options.allowed_tags": (
-            SortOverrideConfiguration(inline_arrays=True)
-        ),
-        "tool.semantic_release.commit_parser_options.patch_tags": (
-            SortOverrideConfiguration(inline_arrays=True)
-        ),
-        # -- Tool sub-table ordering --
-        "tool": SortOverrideConfiguration(
-            first=[
-                "hatch",
-                "git-cliff",
-                "pypis_delivery_service",
-                "uv",
-                "pytest",
-                "coverage",
-                "ty",
-                "ruff",
-                "mypy",
-                "pyright",
-                "basedpyright",
-                "pylint",
-                "isort",
-                "black",
-                "semantic_release",
-                "*",
-                "tomlsort",
-            ],
-        ),
-        # Sub-tool table ordering matching spec
-        "tool.ruff.lint": SortOverrideConfiguration(
-            first=[
-                "flake8-quotes",
-                "isort",
-                "mccabe",
-                "per-file-ignores",
-                "pycodestyle",
-                "pydocstyle",
-            ],
-        ),
-        "tool.coverage": SortOverrideConfiguration(
-            first=["report", "run"],
-        ),
-        "tool.hatch": SortOverrideConfiguration(
-            first=["build", "version"],
-        ),
-        # -- Preserve-as-is overrides --
-        # tomlsort section: preserve its own config section
-        "tool.tomlsort": SortOverrideConfiguration(
-            table_keys=False,
-            inline_arrays=False,
-            first=["*"],
-        ),
-        "tool.tomlsort.*": SortOverrideConfiguration(
-            table_keys=False,
-            inline_arrays=False,
-        ),
-    }
+    return dict(_SORT_OVERRIDES)
 
 
 def get_comment_config() -> CommentConfiguration:
@@ -239,7 +258,7 @@ _CONFLICT_WARNING = (
 )
 
 
-def load_config(text: str) -> dict | None:
+def load_config(text: str) -> dict[str, object] | None:
     """Extract ``[tool.pypfmt]`` from TOML text.
 
     Pure extraction -- no merging logic. Returns the raw dict when the
@@ -266,13 +285,17 @@ def check_config_conflict(text: str) -> str | None:
     return None
 
 
-def _merge_sort_config(default: SortConfiguration, user: dict) -> SortConfiguration:
+def _merge_sort_config(
+    default: SortConfiguration, user: Mapping[str, object]
+) -> SortConfiguration:
     """Apply user overrides to the default SortConfiguration."""
     replacements: dict[str, object] = {}
     if "sort-first" in user:
-        replacements["first"] = list(user["sort-first"])
+        replacements["first"] = list(cast("Iterable[str]", user["sort-first"]))
     elif "extend-sort-first" in user:
-        replacements["first"] = list(default.first) + list(user["extend-sort-first"])
+        replacements["first"] = list(default.first) + list(
+            cast("Iterable[str]", user["extend-sort-first"])
+        )
     if "sort-tables" in user:
         replacements["tables"] = user["sort-tables"]
     if "sort-table-keys" in user:
@@ -287,26 +310,40 @@ def _merge_sort_config(default: SortConfiguration, user: dict) -> SortConfigurat
 
 
 def _merge_sort_overrides(
-    default: dict[str, SortOverrideConfiguration], user: dict
+    default: dict[str, SortOverrideConfiguration], user: Mapping[str, object]
 ) -> dict[str, SortOverrideConfiguration]:
     """Apply user overrides to the per-table sort overrides."""
     if "overrides" in user:
         # Replace: start fresh from user dict only
-        return {
-            path: SortOverrideConfiguration(**cfg)
-            for path, cfg in user["overrides"].items()
-        }
+        result: dict[str, SortOverrideConfiguration] = {}
+        # Constructor kwargs come from untrusted TOML; the try/except below
+        # is the runtime validation guard for unexpected keys or value types.
+        overrides = cast("Mapping[str, Mapping[str, Any]]", user["overrides"])
+        for path, cfg in overrides.items():
+            try:
+                result[path] = SortOverrideConfiguration(**cfg)
+            except TypeError as e:
+                msg = f"[tool.pypfmt] overrides.{path!r}: {e}"
+                raise ValueError(msg) from e
+        return result
     if "extend-overrides" in user:
         # Extend: copy defaults, then update with user entries
         merged = dict(default)
-        for path, cfg in user["extend-overrides"].items():
-            merged[path] = SortOverrideConfiguration(**cfg)
+        extend_overrides = cast(
+            "Mapping[str, Mapping[str, Any]]", user["extend-overrides"]
+        )
+        for path, cfg in extend_overrides.items():
+            try:
+                merged[path] = SortOverrideConfiguration(**cfg)
+            except TypeError as e:
+                msg = f"[tool.pypfmt] extend-overrides.{path!r}: {e}"
+                raise ValueError(msg) from e
         return merged
     return default
 
 
 def _merge_comment_config(
-    default: CommentConfiguration, user: dict
+    default: CommentConfiguration, user: Mapping[str, object]
 ) -> CommentConfiguration:
     """Apply user overrides to CommentConfiguration."""
     replacements: dict[str, object] = {}
@@ -317,7 +354,7 @@ def _merge_comment_config(
 
 
 def _merge_format_config(
-    default: FormattingConfiguration, user: dict
+    default: FormattingConfiguration, user: Mapping[str, object]
 ) -> FormattingConfiguration:
     """Apply user overrides to FormattingConfiguration."""
     replacements: dict[str, object] = {}
@@ -327,12 +364,14 @@ def _merge_format_config(
     return dataclasses.replace(default, **replacements) if replacements else default
 
 
-def _merge_taplo_options(default: tuple[str, ...], user: dict) -> tuple[str, ...]:
+def _merge_taplo_options(
+    default: tuple[str, ...], user: Mapping[str, object]
+) -> tuple[str, ...]:
     """Apply user overrides to taplo options."""
     if "taplo-options" in user:
-        return tuple(user["taplo-options"])
+        return tuple(cast("Iterable[str]", user["taplo-options"]))
     if "extend-taplo-options" in user:
-        return default + tuple(user["extend-taplo-options"])
+        return default + tuple(cast("Iterable[str]", user["extend-taplo-options"]))
     return default
 
 
@@ -345,7 +384,7 @@ MergedConfig = tuple[
 ]
 
 
-def merge_config(user: dict) -> MergedConfig:
+def merge_config(user: Mapping[str, object]) -> MergedConfig:
     """Merge user overrides with hardcoded defaults.
 
     Takes the raw dict from ``load_config()`` and returns a 5-tuple of

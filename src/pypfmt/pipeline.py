@@ -6,6 +6,8 @@ str -> str transformation. This is the public API for pypfmt.
 
 from __future__ import annotations
 
+__all__ = ["format_pyproject"]
+
 import tomllib
 from typing import TYPE_CHECKING
 

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+__all__ = ["app"]
+
 import difflib
 import io
 import select
@@ -43,7 +45,15 @@ def _version_callback(value: bool) -> None:
 
 
 def _print_diff(original: str, formatted: str, filename: str) -> None:
-    """Print unified diff, colored if stdout is a terminal."""
+    """Print unified diff, colored if stdout is a terminal.
+
+    Args:
+        original: The original TOML content before formatting.
+        formatted: The formatted TOML content after processing.
+        filename: Label used as the diff header path. This is a display
+            label, not necessarily a real filesystem path — callers may
+            pass ``"stdin"`` when processing piped input.
+    """
     diff_lines = difflib.unified_diff(
         original.splitlines(keepends=True),
         formatted.splitlines(keepends=True),
@@ -180,6 +190,45 @@ def _process_file(filepath: str, *, check: bool, diff: bool) -> int:
     return 0
 
 
+def _process_stdin(*, check: bool, diff: bool) -> int:
+    """Process piped stdin input through the formatting pipeline.
+
+    Reads TOML content from stdin, formats it, and dispatches based on
+    the check/diff/fix mode flags, mirroring the behaviour of
+    ``_process_file`` for file-based processing.
+
+    Args:
+        check: When ``True``, exit non-zero if stdin content is not
+            already formatted; do not emit formatted output.
+        diff: When ``True``, print a unified diff of any changes.
+
+    Returns:
+        0 when stdin is already formatted or when fix/diff mode succeeds,
+        1 when check mode detects unformatted content or on parse error.
+    """
+    text = sys.stdin.read()
+    merged = _load_and_warn(text)
+    try:
+        result = _format_with_config(text, merged)
+    except tomllib.TOMLDecodeError as exc:
+        typer.echo(f"error: stdin: {exc}", err=True)
+        return 1
+
+    if check and diff:
+        if text != result:
+            _print_diff(text, result, "stdin")
+        return 0 if text == result else 1
+    if check:
+        return 0 if text == result else 1
+    if diff:
+        if text != result:
+            _print_diff(text, result, "stdin")
+        return 0
+    # Fix mode: write formatted output to stdout
+    typer.echo(result, nl=False)
+    return 0
+
+
 @app.command()
 def main(
     files: Annotated[
@@ -219,33 +268,14 @@ def main(
             typer.echo("error: no input files provided", err=True)
             raise typer.Exit(code=2)
         # Stdin mode (piped input available)
-        text = sys.stdin.read()
-        merged = _load_and_warn(text)
-        try:
-            result = _format_with_config(text, merged)
-        except tomllib.TOMLDecodeError as exc:
-            typer.echo(f"error: stdin: {exc}", err=True)
-            raise typer.Exit(code=1) from None
+        raise typer.Exit(code=_process_stdin(check=check, diff=diff))
 
-        if check and diff:
-            if text != result:
-                _print_diff(text, result, "stdin")
-            raise typer.Exit(code=0 if text == result else 1)
-        if check:
-            raise typer.Exit(code=0 if text == result else 1)
-        if diff:
-            if text != result:
-                _print_diff(text, result, "stdin")
-            raise typer.Exit()
-        # Fix mode: write formatted output to stdout
-        typer.echo(result, nl=False)
-    else:
-        # File mode
-        exit_code = 0
-        for filepath in files:
-            code = _process_file(filepath, check=check, diff=diff)
-            exit_code = max(exit_code, code)
-        raise typer.Exit(code=exit_code)
+    # File mode
+    exit_code = 0
+    for filepath in files:
+        code = _process_file(filepath, check=check, diff=diff)
+        exit_code = max(exit_code, code)
+    raise typer.Exit(code=exit_code)
 
 
 if __name__ == "__main__":
