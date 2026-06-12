@@ -212,7 +212,10 @@ def get_sort_overrides() -> dict[str, SortOverrideConfiguration]:
     - first lists on sub-tool overrides control sub-sub-table ordering
     - tool.tomlsort overrides explicitly preserve its own config section
     """
-    return dict(_SORT_OVERRIDES)
+    return {
+        k: dataclasses.replace(v, first=list(v.first))
+        for k, v in _SORT_OVERRIDES.items()
+    }
 
 
 def get_comment_config() -> CommentConfiguration:
