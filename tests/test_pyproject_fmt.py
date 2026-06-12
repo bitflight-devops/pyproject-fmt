@@ -13,6 +13,15 @@ runner = CliRunner()
 
 UNFORMATTED_TOML = '[project]\nname="test"\n'
 
+# Triggers ValueError from merge_config() because SortOverrideConfiguration
+# does not accept ``invalid_field``.  The TypeError raised internally is
+# re-raised as ValueError with a ``[tool.pypfmt] overrides.'project': ...``
+# message, exercising the try/except ValueError guard added to both
+# _process_file and _process_stdin.
+INVALID_PYPFMT_CONFIG_TOML = (
+    '[project]\nname = "test"\n\n[tool.pypfmt.overrides.project]\ninvalid_field = true\n'
+)
+
 
 def test_version() -> None:
     """Test that version is defined."""
@@ -202,6 +211,42 @@ def test_cli_file_not_found() -> None:
     """Missing file reports error to stderr and exits non-zero."""
     result = runner.invoke(app, ["nonexistent.toml"])
 
+    assert result.exit_code == 1
+    assert "error" in result.stderr
+
+
+def test_cli_file_invalid_pypfmt_override_exits_with_error(tmp_path: Path) -> None:
+    """File with an unrecognised [tool.pypfmt.overrides] field exits 1 with error on stderr.
+
+    merge_config() raises ValueError when SortOverrideConfiguration receives
+    an unexpected keyword argument.  _process_file wraps _load_and_warn in a
+    try/except ValueError so the CLI emits a clean error line instead of
+    propagating the exception as a traceback.
+    """
+    # Arrange
+    filepath = tmp_path / "pyproject.toml"
+    filepath.write_text(INVALID_PYPFMT_CONFIG_TOML)
+
+    # Act
+    result = runner.invoke(app, [str(filepath)])
+
+    # Assert
+    assert result.exit_code == 1
+    assert "error" in result.stderr
+
+
+def test_cli_stdin_invalid_pypfmt_override_exits_with_error() -> None:
+    """Stdin with an unrecognised [tool.pypfmt.overrides] field exits 1 with error on stderr.
+
+    merge_config() raises ValueError when SortOverrideConfiguration receives
+    an unexpected keyword argument.  _process_stdin wraps _load_and_warn in a
+    try/except ValueError so the CLI emits a clean error line instead of
+    propagating the exception as a traceback.
+    """
+    # Act
+    result = runner.invoke(app, [], input=INVALID_PYPFMT_CONFIG_TOML)
+
+    # Assert
     assert result.exit_code == 1
     assert "error" in result.stderr
 
