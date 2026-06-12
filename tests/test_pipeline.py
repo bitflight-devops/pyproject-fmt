@@ -5,7 +5,7 @@ from __future__ import annotations
 import difflib
 import re
 import tomllib
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 import pytest
 
@@ -36,7 +36,7 @@ def _flatten_dict(data: dict[str, Any], prefix: str = "") -> dict[str, Any]:
             if has_dicts:
                 for i, item in enumerate(value):
                     if isinstance(item, dict):
-                        result.update(_flatten_dict(item, f"{full_key}[{i}]"))
+                        result.update(_flatten_dict(cast("dict[str, Any]", item), f"{full_key}[{i}]"))
                     else:
                         result[f"{full_key}[{i}]"] = item
             else:
