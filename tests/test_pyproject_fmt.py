@@ -19,7 +19,8 @@ UNFORMATTED_TOML = '[project]\nname="test"\n'
 # message, exercising the try/except ValueError guard added to both
 # _process_file and _process_stdin.
 INVALID_PYPFMT_CONFIG_TOML = (
-    '[project]\nname = "test"\n\n[tool.pypfmt.overrides.project]\ninvalid_field = true\n'
+    '[project]\nname = "test"\n\n'
+    "[tool.pypfmt.overrides.project]\ninvalid_field = true\n"
 )
 
 
@@ -216,7 +217,7 @@ def test_cli_file_not_found() -> None:
 
 
 def test_cli_file_invalid_pypfmt_override_exits_with_error(tmp_path: Path) -> None:
-    """File with an unrecognised [tool.pypfmt.overrides] field exits 1 with error on stderr.
+    """File with an unrecognised [tool.pypfmt.overrides] field exits 1.
 
     merge_config() raises ValueError when SortOverrideConfiguration receives
     an unexpected keyword argument.  _process_file wraps _load_and_warn in a
@@ -236,7 +237,7 @@ def test_cli_file_invalid_pypfmt_override_exits_with_error(tmp_path: Path) -> No
 
 
 def test_cli_stdin_invalid_pypfmt_override_exits_with_error() -> None:
-    """Stdin with an unrecognised [tool.pypfmt.overrides] field exits 1 with error on stderr.
+    """Stdin with an unrecognised [tool.pypfmt.overrides] field exits 1.
 
     merge_config() raises ValueError when SortOverrideConfiguration receives
     an unexpected keyword argument.  _process_stdin wraps _load_and_warn in a
