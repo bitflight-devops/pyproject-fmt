@@ -6,6 +6,8 @@ This is the second stage of the pipeline: format after sorting.
 
 from __future__ import annotations
 
+__all__ = ["format_toml"]
+
 import shutil
 import subprocess
 

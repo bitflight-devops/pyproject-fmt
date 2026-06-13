@@ -5,9 +5,11 @@ from __future__ import annotations
 import difflib
 import re
 import tomllib
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 import pytest
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -36,7 +38,8 @@ def _flatten_dict(data: dict[str, Any], prefix: str = "") -> dict[str, Any]:
             if has_dicts:
                 for i, item in enumerate(value):
                     if isinstance(item, dict):
-                        result.update(_flatten_dict(item, f"{full_key}[{i}]"))
+                        typed_item = cast("dict[str, Any]", item)
+                        result.update(_flatten_dict(typed_item, f"{full_key}[{i}]"))
                     else:
                         result[f"{full_key}[{i}]"] = item
             else:
@@ -267,3 +270,26 @@ def test_golden_file_exists(fixtures_dir: Path):
     assert golden.stat().st_size > 0, "Golden file is empty"
     # Verify it's valid TOML
     tomllib.loads(golden.read_text())
+
+
+# ---------------------------------------------------------------------------
+# PIPE-HYPO: Property-based idempotency via Hypothesis
+# ---------------------------------------------------------------------------
+@given(st.text(alphabet=st.characters(blacklist_categories=("Cs",)), min_size=1))
+@settings(max_examples=50)
+def test_format_raises_or_idempotent(raw: str) -> None:
+    """Pipeline either raises TOMLDecodeError or produces idempotent output.
+
+    For any text input the pipeline must either:
+    - Reject it with TOMLDecodeError (invalid TOML is expected and acceptable), or
+    - Produce output that is already a fixed point (running it again yields
+      the same result), proving the formatter is idempotent over all valid inputs.
+    """
+    # Arrange: raw is provided by Hypothesis
+    # Act
+    try:
+        result = format_pyproject(raw)
+    except tomllib.TOMLDecodeError:
+        return
+    # Assert: valid TOML output must be a fixed point
+    assert format_pyproject(result) == result
