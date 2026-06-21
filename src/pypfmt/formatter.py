@@ -43,14 +43,22 @@ def format_toml(
         cmd.extend(["-o", option])
     cmd.append("-")
 
+    # taplo reads stdin and writes stdout as UTF-8 on every platform.
+    # Pin the subprocess encoding to UTF-8 so Python does not fall back to
+    # the locale code page (e.g. cp1252 on Windows), which would corrupt any
+    # non-ASCII bytes and make taplo reject the input.
     result = subprocess.run(
         cmd,
         input=text,
         capture_output=True,
         text=True,
+        encoding="utf-8",
         check=False,
     )
     if result.returncode != 0:
-        msg = f"taplo format failed: {result.stderr}"
+        # taplo reports parse errors on stderr, but some failures surface
+        # only on stdout, so include both to avoid an empty error message.
+        detail = result.stderr.strip() or result.stdout.strip() or "(no output)"
+        msg = f"taplo format failed: {detail}"
         raise RuntimeError(msg)
     return result.stdout

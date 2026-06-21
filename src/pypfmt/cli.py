@@ -210,7 +210,9 @@ def _process_stdin(*, check: bool, diff: bool) -> int:
         0 when stdin is already formatted or when fix/diff mode succeeds,
         1 when check mode detects unformatted content or on parse error.
     """
-    text = sys.stdin.read()
+    # Decode piped input as UTF-8 rather than the locale code page
+    # (e.g. cp1252 on Windows), which would corrupt non-ASCII content.
+    text = sys.stdin.buffer.read().decode("utf-8")
     try:
         merged = _load_and_warn(text)
     except ValueError as exc:

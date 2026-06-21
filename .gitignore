@@ -144,3 +144,9 @@ Thumbs.db
 .env.*
 !.env.example
 tests/fixtures/after.toml.bak
+
+# Beads / Dolt files (added by bd init)
+.dolt/
+*.db
+.beads-credential-key
+.beads/proxieddb/
