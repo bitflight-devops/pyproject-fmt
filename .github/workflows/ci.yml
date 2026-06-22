@@ -115,8 +115,8 @@ jobs:
       - run: uv sync --all-groups
       - run: uv run poe pysentry
 
-  release:
-    name: Tag and Release
+  tag:
+    name: Tag
     needs: [lint, type-check, test, sast_with_semgrep]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
@@ -127,24 +127,19 @@ jobs:
         with:
           fetch-depth: 0
 
+      # Push the tag with RELEASE_TOKEN (a PAT/App token), NOT the default
+      # GITHUB_TOKEN. Tags pushed by GITHUB_TOKEN cannot trigger another
+      # workflow, so using it here would silently break the tag-release.yml
+      # -> release.yml publish chain.
       - name: Bump version and push tag
         id: tag_version
         uses: mathieudutour/github-tag-action@v6.2
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.RELEASE_TOKEN }}
           default_bump: false
           create_annotated_tag: true
           fetch_all_tags: true
           custom_release_rules: "refactor:patch:Refactoring,perf:patch:Performance,ci:patch:CI,docs:patch:Documentation,style:patch:Style,chore:patch:Chores,test:patch:Testing"
-
-      - name: Create a GitHub release
-        if: steps.tag_version.outputs.new_tag
-        uses: ncipollo/release-action@v1
-        with:
-          tag: ${{ steps.tag_version.outputs.new_tag }}
-          name: Release ${{ steps.tag_version.outputs.new_tag }}
-          body: ${{ steps.tag_version.outputs.changelog }}
-          token: ${{ secrets.GITHUB_TOKEN }}
 
   sast_with_semgrep:
     name: semgrep scan

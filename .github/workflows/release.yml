@@ -27,6 +27,22 @@ jobs:
       - name: Set up Python
         run: uv python install 3.11
 
+      # Guard against the hatch-vcs version-derivation bug that previously
+      # shipped 0.1.0 for tag v1.0.1. Fail loudly if the version hatch
+      # computes from the checked-out tag does not match the tag itself,
+      # rather than silently publishing the wrong version to PyPI.
+      - name: Verify version matches tag
+        run: |
+          tag_version="${TAG_NAME#v}"
+          build_version="$(uvx hatch version)"
+          echo "tag=${tag_version} hatch-vcs=${build_version}"
+          if [ "${tag_version}" != "${build_version}" ]; then
+            echo "::error::hatch-vcs version (${build_version}) does not match tag (${tag_version})"
+            exit 1
+          fi
+        env:
+          TAG_NAME: ${{ github.event.release.tag_name }}
+
       - name: Build package
         run: uv build
 

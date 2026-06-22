@@ -4,6 +4,17 @@ name: Documentation
 on:
   push:
     branches: [main]
+    # Only rebuild the site when something that feeds the mkdocs build
+    # changes. src/** is included because mkdocstrings renders the API
+    # Reference from the package source/docstrings; pyproject.toml + uv.lock
+    # because the build installs the docs dependency group via uv sync.
+    paths:
+      - "docs/**"
+      - "mkdocs.yml"
+      - "src/**"
+      - "pyproject.toml"
+      - "uv.lock"
+      - ".github/workflows/docs.yml"
   workflow_dispatch:
 
 permissions:
@@ -37,8 +48,13 @@ jobs:
       - name: Build documentation
         run: uv run poe docs
 
+      # enablement: true makes the workflow turn on GitHub Pages (with the
+      # "GitHub Actions" build source) on first run, instead of failing with
+      # "Get Pages site failed / Not Found" when Pages has never been enabled.
       - name: Setup Pages
         uses: actions/configure-pages@v6
+        with:
+          enablement: true
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5

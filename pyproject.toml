@@ -33,7 +33,7 @@ dependencies = [
 pypfmt = "pypfmt.cli:app"
 
 [project.urls]
-Changelog = "https://github.com/bitflight-devops/pyproject-fmt/blob/main/CHANGELOG.md"
+Changelog = "https://github.com/bitflight-devops/pyproject-fmt/releases"
 Documentation = "https://bitflight-devops.github.io/pyproject-fmt"
 Homepage = "https://github.com/bitflight-devops/pyproject-fmt"
 Issues = "https://github.com/bitflight-devops/pyproject-fmt/issues"
