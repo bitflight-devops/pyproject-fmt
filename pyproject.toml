@@ -1,4 +1,5 @@
 # dogfood — test unicode support
+
 [project]
 name = "pypfmt"
 description = "A Python package to sort and format pyproject.toml"
@@ -25,7 +26,7 @@ keywords = []
 requires-python = ">=3.11"
 dependencies = [
     "taplo>=0.9.3",
-    "toml-sort>=0.24.4,<0.25",
+    "toml-sort>=0.24.4",
     "typer>=0.26.7",
 ]
 
@@ -47,15 +48,15 @@ build-backend = "hatchling.build"
 dev = [
     "hatch-vcs>=0.5.0",
     "hatch>=1.17.0",
-    "hypothesis>=6.0.0",
+    "hypothesis>=6.155.7",
     "poethepoet>=0.46.0",
-    "prek>=0.4.4",
+    "prek>=0.4.5",
     "pysentry-rs>=0.4.6",
     "pytest-cov>=7.1.0",
     "pytest-mock>=3.15.1",
-    "pytest>=9.0.3",
-    "ruff>=0.15.17",
-    "ty>=0.0.48",
+    "pytest>=9.1.1",
+    "ruff>=0.15.18",
+    "ty>=0.0.51",
 ]
 docs = [
     "mkdocs-material>=9.7.6",
@@ -115,12 +116,6 @@ branch = true
 parallel = true
 source = ["src/pypfmt"]
 
-[tool.basedpyright]
-typeCheckingMode = "off"
-
-[tool.mypy]
-exclude = [".*"]
-
 [tool.ty.src]
 include = ["**/*.py"]
 
@@ -151,6 +146,12 @@ known-first-party = ["pypfmt"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = ["ARG001"]
+
+[tool.mypy]
+exclude = [".*"]
+
+[tool.basedpyright]
+typeCheckingMode = "off"
 
 [tool.poe.tasks.docs]
 cmd = "mkdocs build"
