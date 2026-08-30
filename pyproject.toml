@@ -142,7 +142,10 @@ select = [
 ]
 
 [tool.ruff.lint.isort]
+combine-as-imports = true
 known-first-party = ["pypfmt"]
+required-imports = ["from __future__ import annotations"]
+split-on-trailing-comma = false
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = ["ARG001"]
