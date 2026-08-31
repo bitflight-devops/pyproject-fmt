@@ -93,6 +93,7 @@ from pyproject_fmt import __version__
 ```python
 """Command-line interface for pyproject_fmt."""
 
+
 def version_callback(value: bool) -> None:
     """Print version and exit."""
 ```

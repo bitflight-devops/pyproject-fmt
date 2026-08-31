@@ -15,12 +15,7 @@ from typing import Annotated
 import typer
 
 from pypfmt import __version__
-from pypfmt.config import (
-    MergedConfig,
-    check_config_conflict,
-    load_config,
-    merge_config,
-)
+from pypfmt.config import MergedConfig, check_config_conflict, load_config, merge_config
 from pypfmt.pipeline import format_pyproject
 
 _RED = "\033[31m"

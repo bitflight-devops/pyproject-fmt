@@ -1,5 +1,5 @@
-# /// script
 # List dependencies for linting only
+# /// script
 # dependencies = [
 #   "hatchling>=1.14.0",
 # ]
@@ -8,6 +8,8 @@
 
 Based on <https://github.com/maresb/hatch-vcs-footgun-example>.
 """
+
+from __future__ import annotations
 
 import pathlib
 

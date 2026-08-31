@@ -63,12 +63,12 @@ from toml_sort.tomlsort import (
 
 # Configure sorting behavior
 sort_config = SortConfiguration(
-    tables=True,           # Sort top-level tables
-    table_keys=True,       # Sort keys within tables
-    inline_tables=False,   # Don't sort inline table keys
-    inline_arrays=True,    # Sort inline array values
-    ignore_case=False,     # Case-sensitive sorting
-    first=[                # Tables pinned to top, in this order
+    tables=True,  # Sort top-level tables
+    table_keys=True,  # Sort keys within tables
+    inline_tables=False,  # Don't sort inline table keys
+    inline_arrays=True,  # Sort inline array values
+    ignore_case=False,  # Case-sensitive sorting
+    first=[  # Tables pinned to top, in this order
         "build-system",
         "project",
     ],
@@ -79,7 +79,7 @@ overrides = {
     "project": SortOverrideConfiguration(
         table_keys=True,
         inline_arrays=True,
-        first=[            # Keys pinned to top within [project]
+        first=[  # Keys pinned to top within [project]
             "name",
             "version",
             "description",
@@ -92,10 +92,10 @@ overrides = {
 
 # Comment handling
 comment_config = CommentConfiguration(
-    header=True,     # Preserve header comments
-    footer=True,     # Preserve footer comments
-    inline=True,     # Preserve inline comments
-    block=True,      # Preserve block comments
+    header=True,  # Preserve header comments
+    footer=True,  # Preserve footer comments
+    inline=True,  # Preserve inline comments
+    block=True,  # Preserve block comments
 )
 
 # Minor formatting (toml-sort has limited formatting)
@@ -124,7 +124,10 @@ sorted_output = sorter.sorted()  # Returns sorted TOML string
 import subprocess
 import shutil
 
-def format_toml_with_taplo(toml_string: str, options: dict[str, str] | None = None) -> str:
+
+def format_toml_with_taplo(
+    toml_string: str, options: dict[str, str] | None = None
+) -> str:
     """Format TOML string using taplo via subprocess."""
     taplo_bin = shutil.which("taplo")
     if taplo_bin is None:

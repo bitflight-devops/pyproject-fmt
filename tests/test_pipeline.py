@@ -8,8 +8,7 @@ import tomllib
 from typing import TYPE_CHECKING, Any, cast
 
 import pytest
-from hypothesis import given, settings
-from hypothesis import strategies as st
+from hypothesis import given, settings, strategies as st
 
 if TYPE_CHECKING:
     from pathlib import Path

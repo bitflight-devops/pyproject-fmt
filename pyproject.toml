@@ -55,8 +55,8 @@ dev = [
     "pytest-cov>=7.1.0",
     "pytest-mock>=3.15.1",
     "pytest>=9.1.1",
-    "ruff>=0.15.18",
-    "ty>=0.0.51",
+    "ruff>=0.16.5",
+    "ty>=0.0.75",
 ]
 docs = [
     "mkdocs-material>=9.7.6",
@@ -125,6 +125,11 @@ src = ["src", "tests"]
 target-version = "py311"
 
 [tool.ruff.lint]
+ignore = [
+    "TC001",
+    "TC002",
+    "TC003",
+]
 select = [
     "ARG", # flake8-unused-arguments
     "B",   # flake8-bugbear
@@ -142,7 +147,10 @@ select = [
 ]
 
 [tool.ruff.lint.isort]
+combine-as-imports = true
 known-first-party = ["pypfmt"]
+required-imports = ["from __future__ import annotations"]
+split-on-trailing-comma = false
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = ["ARG001"]
