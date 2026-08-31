@@ -46,3 +46,6 @@ repos:
         language: system
         types: [python]
         pass_filenames: false
+
+default_language_version:
+  node: 24.16.0
