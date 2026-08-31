@@ -2,6 +2,11 @@
 # See https://prek.j178.dev for more information
 
 repos:
+  - repo: https://github.com/mxr/sync-pre-commit-deps
+    rev: v0.0.5
+    hooks:
+      - id: sync-pre-commit-deps
+
   # General hooks
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
