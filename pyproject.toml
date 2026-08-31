@@ -125,6 +125,11 @@ src = ["src", "tests"]
 target-version = "py311"
 
 [tool.ruff.lint]
+ignore = [
+    "TC001",
+    "TC002",
+    "TC003",
+]
 select = [
     "ARG", # flake8-unused-arguments
     "B",   # flake8-bugbear

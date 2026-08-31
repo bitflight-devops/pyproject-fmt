@@ -3,17 +3,13 @@
 from __future__ import annotations
 
 import sys
-from typing import TYPE_CHECKING
+from pathlib import Path
 
+from pytest_mock import MockerFixture
 from typer.testing import CliRunner
 
 from pypfmt import __version__
 from pypfmt.cli import app
-
-if TYPE_CHECKING:
-    from pathlib import Path
-
-    from pytest_mock import MockerFixture
 
 runner = CliRunner()
 
