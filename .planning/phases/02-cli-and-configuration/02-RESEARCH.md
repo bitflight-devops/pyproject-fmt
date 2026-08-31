@@ -107,14 +107,23 @@ app = typer.Typer(
     add_completion=False,
 )
 
+
 @app.command()
 def main(
-    files: Annotated[Optional[list[str]], typer.Argument(help="TOML files to format")] = None,
-    check: Annotated[bool, typer.Option("--check", help="Dry-run, exit non-zero if changes needed")] = False,
-    diff: Annotated[bool, typer.Option("--diff", help="Print unified diff of changes")] = False,
-    version: Annotated[Optional[bool], typer.Option("--version", "-v", callback=version_callback, is_eager=True)] = None,
-):
-    ...
+    files: Annotated[
+        Optional[list[str]], typer.Argument(help="TOML files to format")
+    ] = None,
+    check: Annotated[
+        bool, typer.Option("--check", help="Dry-run, exit non-zero if changes needed")
+    ] = False,
+    diff: Annotated[
+        bool, typer.Option("--diff", help="Print unified diff of changes")
+    ] = False,
+    version: Annotated[
+        Optional[bool],
+        typer.Option("--version", "-v", callback=version_callback, is_eager=True),
+    ] = None,
+): ...
 ```
 
 ### Pattern 2: Stdin/File Dispatch
@@ -125,6 +134,7 @@ def main(
 ```python
 # Source: Verified by testing Typer 0.21.1 + sys.stdin
 import sys
+
 
 def main(files: ...):
     if not files:
@@ -177,6 +187,7 @@ raise typer.Exit(code=exit_code)
 
 import dataclasses
 
+
 def merge_sort_config(default: SortConfiguration, user: dict) -> SortConfiguration:
     """Merge user overrides into default SortConfiguration."""
     updates = {}
@@ -198,6 +209,7 @@ def merge_sort_config(default: SortConfiguration, user: dict) -> SortConfigurati
 ```python
 # Source: Verified by testing tomllib on sample with both sections
 import os, tomllib
+
 
 def check_config_conflict(text: str) -> None:
     """Warn if both [tool.tomlsort] and [tool.pyproject-fmt] exist."""
@@ -296,19 +308,31 @@ import typer
 
 app = typer.Typer(name="pyproject_fmt", add_completion=False)
 
+
 def version_callback(value: bool) -> None:
     if value:
         typer.echo(f"pyproject_fmt {__version__}")
         raise typer.Exit()
 
+
 @app.command()
 def main(
-    files: Annotated[Optional[list[str]], typer.Argument(help="TOML files to format")] = None,
-    check: Annotated[bool, typer.Option("--check", help="Check if files are formatted")] = False,
+    files: Annotated[
+        Optional[list[str]], typer.Argument(help="TOML files to format")
+    ] = None,
+    check: Annotated[
+        bool, typer.Option("--check", help="Check if files are formatted")
+    ] = False,
     diff: Annotated[bool, typer.Option("--diff", help="Show diff of changes")] = False,
-    version: Annotated[Optional[bool], typer.Option(
-        "--version", "-v", callback=version_callback, is_eager=True,
-    )] = None,
+    version: Annotated[
+        Optional[bool],
+        typer.Option(
+            "--version",
+            "-v",
+            callback=version_callback,
+            is_eager=True,
+        ),
+    ] = None,
 ):
     """Sort and format pyproject.toml files."""
     ...
@@ -353,6 +377,7 @@ GREEN = "\033[32m"
 CYAN = "\033[36m"
 RESET = "\033[0m"
 
+
 def print_diff(original: str, formatted: str, filename: str) -> None:
     """Print unified diff, colored if stdout is a terminal."""
     diff = difflib.unified_diff(
@@ -364,7 +389,11 @@ def print_diff(original: str, formatted: str, filename: str) -> None:
     use_color = sys.stdout.isatty()
     for line in diff:
         if use_color:
-            if line.startswith("---") or line.startswith("+++") or line.startswith("@@"):
+            if (
+                line.startswith("---")
+                or line.startswith("+++")
+                or line.startswith("@@")
+            ):
                 sys.stdout.write(f"{CYAN}{line}{RESET}")
             elif line.startswith("-"):
                 sys.stdout.write(f"{RED}{line}{RESET}")
@@ -386,8 +415,11 @@ import dataclasses
 from toml_sort.tomlsort import SortConfiguration
 
 default = SortConfiguration(
-    tables=True, table_keys=True, inline_tables=False,
-    inline_arrays=True, ignore_case=False,
+    tables=True,
+    table_keys=True,
+    inline_tables=False,
+    inline_arrays=True,
+    ignore_case=False,
     first=["project", "build-system", "dependency-groups"],
 )
 

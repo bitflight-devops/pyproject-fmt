@@ -78,27 +78,48 @@ The config component reads from `[tool.pyproject-fmt]` in the target pyproject.t
 @dataclass
 class SortConfig:
     """Maps to toml-sort's SortConfiguration + SortOverrideConfiguration."""
+
     sort_tables: bool = True
     sort_table_keys: bool = True
     sort_inline_tables: bool = False
     sort_inline_arrays: bool = False
     ignore_case: bool = False
     # Table ordering: first tables get placed before alphabetical
-    table_order: list[str] = field(default_factory=lambda: [
-        "build-system", "project", "dependency-groups", "tool",
-    ])
+    table_order: list[str] = field(
+        default_factory=lambda: [
+            "build-system",
+            "project",
+            "dependency-groups",
+            "tool",
+        ]
+    )
     # Key ordering within [project]
-    project_key_order: list[str] = field(default_factory=lambda: [
-        "name", "version", "description", "readme",
-        "license", "requires-python", "authors",
-        "maintainers", "keywords", "classifiers",
-        "urls", "scripts", "gui-scripts", "entry-points",
-        "dependencies", "optional-dependencies",
-    ])
+    project_key_order: list[str] = field(
+        default_factory=lambda: [
+            "name",
+            "version",
+            "description",
+            "readme",
+            "license",
+            "requires-python",
+            "authors",
+            "maintainers",
+            "keywords",
+            "classifiers",
+            "urls",
+            "scripts",
+            "gui-scripts",
+            "entry-points",
+            "dependencies",
+            "optional-dependencies",
+        ]
+    )
+
 
 @dataclass
 class FormatConfig:
     """Maps to taplo formatter options."""
+
     column_width: int = 80
     indent_string: str = "    "
     array_auto_expand: bool = True
@@ -107,6 +128,7 @@ class FormatConfig:
     # MUST be false -- toml-sort handles ordering
     reorder_keys: bool = False
     allowed_blank_lines: int = 1
+
 
 @dataclass
 class Config:
@@ -134,6 +156,7 @@ from toml_sort.tomlsort import (
     SortConfiguration,
     SortOverrideConfiguration,
 )
+
 
 def sort_toml(text: str, config: Config) -> str:
     """Sort TOML tables and keys according to config."""
@@ -186,22 +209,35 @@ The formatter invokes taplo as a subprocess. taplo is a CLI tool (the PyPI `tapl
 ```python
 import subprocess
 
+
 def format_toml(text: str, config: Config) -> str:
     """Format TOML string using taplo."""
     cmd = [
-        "taplo", "format",
-        "-o", f"column_width={config.format.column_width}",
-        "-o", f"indent_string={config.format.indent_string}",
-        "-o", f"array_auto_expand={str(config.format.array_auto_expand).lower()}",
-        "-o", f"array_trailing_comma={str(config.format.array_trailing_comma).lower()}",
-        "-o", f"align_entries={str(config.format.align_entries).lower()}",
-        "-o", f"reorder_keys={str(config.format.reorder_keys).lower()}",
-        "-o", f"allowed_blank_lines={config.format.allowed_blank_lines}",
+        "taplo",
+        "format",
+        "-o",
+        f"column_width={config.format.column_width}",
+        "-o",
+        f"indent_string={config.format.indent_string}",
+        "-o",
+        f"array_auto_expand={str(config.format.array_auto_expand).lower()}",
+        "-o",
+        f"array_trailing_comma={str(config.format.array_trailing_comma).lower()}",
+        "-o",
+        f"align_entries={str(config.format.align_entries).lower()}",
+        "-o",
+        f"reorder_keys={str(config.format.reorder_keys).lower()}",
+        "-o",
+        f"allowed_blank_lines={config.format.allowed_blank_lines}",
         "--no-auto-config",  # Ignore any .taplo.toml files
         "-",  # Read from stdin
     ]
     result = subprocess.run(
-        cmd, input=text, capture_output=True, text=True, check=False,
+        cmd,
+        input=text,
+        capture_output=True,
+        text=True,
+        check=False,
     )
     if result.returncode != 0:
         raise FormattingError(result.stderr)
@@ -229,6 +265,7 @@ class PipelineResult:
     formatted: str
     changed: bool
     diff: str | None = None
+
 
 def run_pipeline(text: str, config: Config) -> PipelineResult:
     """Run the full sort -> format pipeline."""
@@ -318,6 +355,8 @@ This provides the best preservation. Users who need pixel-perfect comment placem
 ```python
 def sort_toml(text: str, config: Config) -> str: ...
 def format_toml(text: str, config: Config) -> str: ...
+
+
 # Each can be tested independently
 assert sort_toml(input_text, config) == expected_sorted
 assert format_toml(input_text, config) == expected_formatted

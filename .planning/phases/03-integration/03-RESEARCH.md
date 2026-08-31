@@ -212,6 +212,7 @@ repos:
 # Test that the hook entry point works as pre-commit would invoke it
 import subprocess
 
+
 def test_precommit_compatible_invocation(tmp_path):
     """Verify the CLI works when invoked the way pre-commit would."""
     toml_file = tmp_path / "pyproject.toml"
@@ -220,7 +221,8 @@ def test_precommit_compatible_invocation(tmp_path):
     # Pre-commit passes filenames as positional args
     result = subprocess.run(
         ["pyproject_fmt", str(toml_file)],
-        capture_output=True, text=True,
+        capture_output=True,
+        text=True,
     )
     assert result.returncode == 0
 
@@ -228,7 +230,8 @@ def test_precommit_compatible_invocation(tmp_path):
     content_after = toml_file.read_text()
     result2 = subprocess.run(
         ["pyproject_fmt", "--check", str(toml_file)],
-        capture_output=True, text=True,
+        capture_output=True,
+        text=True,
     )
     assert result2.returncode == 0  # No changes needed
 ```

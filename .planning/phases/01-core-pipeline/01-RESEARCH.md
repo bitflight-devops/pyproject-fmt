@@ -104,21 +104,37 @@ from toml_sort.tomlsort import (
     SortOverrideConfiguration,
 )
 
+
 def sort_toml(text: str) -> str:
     """Sort TOML string using toml-sort with hardcoded defaults."""
     sort_config = SortConfiguration(
         tables=True,
         table_keys=True,
         inline_tables=False,
-        inline_arrays=True,   # Sorts array VALUES alphabetically
+        inline_arrays=True,  # Sorts array VALUES alphabetically
         ignore_case=False,
         first=[
-            "project", "project.*", "build-system", "dependency-groups",
-            "tool.hatch", "tool.git-cliff", "tool.pypis_delivery_service",
-            "tool.uv", "tool.pytest", "tool.coverage", "tool.ty", "tool.ruff",
-            "tool.mypy", "tool.pyright", "tool.basedpyright", "tool.pylint",
-            "tool.isort", "tool.black", "tool.semantic_release",
-            "tool.*", "tool.tomlsort",
+            "project",
+            "project.*",
+            "build-system",
+            "dependency-groups",
+            "tool.hatch",
+            "tool.git-cliff",
+            "tool.pypis_delivery_service",
+            "tool.uv",
+            "tool.pytest",
+            "tool.coverage",
+            "tool.ty",
+            "tool.ruff",
+            "tool.mypy",
+            "tool.pyright",
+            "tool.basedpyright",
+            "tool.pylint",
+            "tool.isort",
+            "tool.black",
+            "tool.semantic_release",
+            "tool.*",
+            "tool.tomlsort",
         ],
     )
     # ... overrides, comment_config, format_config ...
@@ -140,6 +156,7 @@ def sort_toml(text: str) -> str:
 ```python
 import tomllib
 
+
 def validate_toml(text: str) -> None:
     """Validate TOML syntax. Raises tomllib.TOMLDecodeError on invalid input."""
     tomllib.loads(text)
@@ -156,23 +173,37 @@ def validate_toml(text: str) -> None:
 # Source: Verified by testing taplo 0.10.0 CLI
 import subprocess
 
+
 def format_toml(text: str) -> str:
     """Format TOML string using taplo subprocess."""
     cmd = [
-        "taplo", "format",
-        "--no-auto-config",        # Ignore user .taplo.toml files
-        "-o", "reorder_keys=false", # Preserve toml-sort ordering (FMT-02)
-        "-o", "indent_string=    ", # 4-space indent (matches golden file)
-        "-o", "array_auto_collapse=false",  # Never collapse multiline arrays
-        "-o", "array_auto_expand=true",     # Expand long arrays
-        "-o", "array_trailing_comma=true",  # Trailing commas (FMT-04)
-        "-o", "align_comments=true",        # Align inline comments
-        "-o", "column_width=80",
-        "-o", "allowed_blank_lines=2",
-        "-",                        # Read from stdin
+        "taplo",
+        "format",
+        "--no-auto-config",  # Ignore user .taplo.toml files
+        "-o",
+        "reorder_keys=false",  # Preserve toml-sort ordering (FMT-02)
+        "-o",
+        "indent_string=    ",  # 4-space indent (matches golden file)
+        "-o",
+        "array_auto_collapse=false",  # Never collapse multiline arrays
+        "-o",
+        "array_auto_expand=true",  # Expand long arrays
+        "-o",
+        "array_trailing_comma=true",  # Trailing commas (FMT-04)
+        "-o",
+        "align_comments=true",  # Align inline comments
+        "-o",
+        "column_width=80",
+        "-o",
+        "allowed_blank_lines=2",
+        "-",  # Read from stdin
     ]
     result = subprocess.run(
-        cmd, input=text, capture_output=True, text=True, check=False,
+        cmd,
+        input=text,
+        capture_output=True,
+        text=True,
+        check=False,
     )
     if result.returncode != 0:
         msg = f"taplo format failed: {result.stderr}"
@@ -267,18 +298,33 @@ from toml_sort.tomlsort import (
 
 # === SortConfiguration fields (verified) ===
 sort_config = SortConfiguration(
-    tables=True,            # Sort top-level tables (default: True)
-    table_keys=True,        # Sort keys within tables (default: True)
-    inline_tables=False,    # Sort keys inside inline tables (default: False)
-    inline_arrays=True,     # Sort VALUES within arrays alphabetically (default: False)
-    ignore_case=False,      # Case-sensitive sort (default: False)
-    first=[                 # Tables pinned to top in this order
-        "project", "project.*", "build-system", "dependency-groups",
-        "tool.hatch", "tool.git-cliff", "tool.pypis_delivery_service",
-        "tool.uv", "tool.pytest", "tool.coverage", "tool.ty", "tool.ruff",
-        "tool.mypy", "tool.pyright", "tool.basedpyright", "tool.pylint",
-        "tool.isort", "tool.black", "tool.semantic_release",
-        "tool.*", "tool.tomlsort",
+    tables=True,  # Sort top-level tables (default: True)
+    table_keys=True,  # Sort keys within tables (default: True)
+    inline_tables=False,  # Sort keys inside inline tables (default: False)
+    inline_arrays=True,  # Sort VALUES within arrays alphabetically (default: False)
+    ignore_case=False,  # Case-sensitive sort (default: False)
+    first=[  # Tables pinned to top in this order
+        "project",
+        "project.*",
+        "build-system",
+        "dependency-groups",
+        "tool.hatch",
+        "tool.git-cliff",
+        "tool.pypis_delivery_service",
+        "tool.uv",
+        "tool.pytest",
+        "tool.coverage",
+        "tool.ty",
+        "tool.ruff",
+        "tool.mypy",
+        "tool.pyright",
+        "tool.basedpyright",
+        "tool.pylint",
+        "tool.isort",
+        "tool.black",
+        "tool.semantic_release",
+        "tool.*",
+        "tool.tomlsort",
     ],
 )
 
@@ -296,16 +342,29 @@ overrides = {
     "project": SortOverrideConfiguration(
         inline_arrays=True,
         first=[
-            "name", "version", "description", "readme", "dynamic",
-            "authors", "maintainers", "license", "classifiers",
-            "keywords", "requires-python", "dependencies",
+            "name",
+            "version",
+            "description",
+            "readme",
+            "dynamic",
+            "authors",
+            "maintainers",
+            "license",
+            "classifiers",
+            "keywords",
+            "requires-python",
+            "dependencies",
         ],
     ),
     "tool.pytest": SortOverrideConfiguration(inline_arrays=True),
-    "tool.pytest.addopts": SortOverrideConfiguration(table_keys=False, inline_arrays=False),
+    "tool.pytest.addopts": SortOverrideConfiguration(
+        table_keys=False, inline_arrays=False
+    ),
     "tool.ruff": SortOverrideConfiguration(inline_arrays=True),
     "tool.ruff.*": SortOverrideConfiguration(inline_arrays=True),
-    "tool.semantic_release.commit_parser_options": SortOverrideConfiguration(inline_arrays=True),
+    "tool.semantic_release.commit_parser_options": SortOverrideConfiguration(
+        inline_arrays=True
+    ),
     "tool.tomlsort": SortOverrideConfiguration(table_keys=False, inline_arrays=False),
     "tool.tomlsort.*": SortOverrideConfiguration(table_keys=False, inline_arrays=False),
     "tool.ty": SortOverrideConfiguration(inline_arrays=True),
@@ -314,17 +373,17 @@ overrides = {
 
 # === CommentConfiguration fields (verified) ===
 comment_config = CommentConfiguration(
-    header=True,   # Preserve file-level header comments (default: True)
-    footer=True,   # Preserve trailing comments at end of file (default: True)
-    inline=True,   # Preserve same-line comments after values (default: True)
-    block=True,    # Preserve comment lines above keys (default: True)
+    header=True,  # Preserve file-level header comments (default: True)
+    footer=True,  # Preserve trailing comments at end of file (default: True)
+    inline=True,  # Preserve same-line comments after values (default: True)
+    block=True,  # Preserve comment lines above keys (default: True)
 )
 
 # === FormattingConfiguration fields (verified) ===
 format_config = FormattingConfiguration(
-    spaces_before_inline_comment=2,   # Spaces before # in inline comments (default: 2)
-    spaces_indent_inline_array=4,     # Indent size for array items (default: 2)
-    trailing_comma_inline_array=True, # Add trailing comma to last array item (default: False)
+    spaces_before_inline_comment=2,  # Spaces before # in inline comments (default: 2)
+    spaces_indent_inline_array=4,  # Indent size for array items (default: 2)
+    trailing_comma_inline_array=True,  # Add trailing comma to last array item (default: False)
 )
 
 # Execute sort
@@ -347,6 +406,7 @@ sorted_text = sorter.sorted()  # Returns sorted TOML string
 import shutil
 import subprocess
 
+
 def format_toml(text: str) -> str:
     """Format TOML string using taplo subprocess."""
     taplo_bin = shutil.which("taplo")
@@ -355,21 +415,34 @@ def format_toml(text: str) -> str:
         raise RuntimeError(msg)
 
     cmd = [
-        taplo_bin, "format",
-        "--no-auto-config",                 # Ignore .taplo.toml files
-        "-o", "reorder_keys=false",         # Preserve toml-sort ordering
-        "-o", "indent_string=    ",         # 4-space indent
-        "-o", "array_auto_collapse=false",  # Never collapse multiline arrays
-        "-o", "array_auto_expand=true",     # Expand long arrays
-        "-o", "array_trailing_comma=true",  # Trailing commas in arrays
-        "-o", "align_comments=true",        # Align inline comments
-        "-o", "column_width=80",            # Line width limit
-        "-o", "allowed_blank_lines=2",      # Max consecutive blank lines
-        "-",                                # Read from stdin
+        taplo_bin,
+        "format",
+        "--no-auto-config",  # Ignore .taplo.toml files
+        "-o",
+        "reorder_keys=false",  # Preserve toml-sort ordering
+        "-o",
+        "indent_string=    ",  # 4-space indent
+        "-o",
+        "array_auto_collapse=false",  # Never collapse multiline arrays
+        "-o",
+        "array_auto_expand=true",  # Expand long arrays
+        "-o",
+        "array_trailing_comma=true",  # Trailing commas in arrays
+        "-o",
+        "align_comments=true",  # Align inline comments
+        "-o",
+        "column_width=80",  # Line width limit
+        "-o",
+        "allowed_blank_lines=2",  # Max consecutive blank lines
+        "-",  # Read from stdin
     ]
 
     result = subprocess.run(
-        cmd, input=text, capture_output=True, text=True, check=False,
+        cmd,
+        input=text,
+        capture_output=True,
+        text=True,
+        check=False,
     )
     if result.returncode != 0:
         msg = f"taplo format failed: {result.stderr}"
@@ -384,6 +457,7 @@ def format_toml(text: str) -> str:
 # Verified: 2026-02-09
 
 import tomllib
+
 
 def validate_toml(text: str) -> None:
     """Validate TOML syntax before pipeline processing.
@@ -400,6 +474,7 @@ def validate_toml(text: str) -> None:
 # Source: Direct pipeline testing
 # Verified: 2026-02-09 -- idempotency PASSED with aligned toml-sort + taplo config
 
+
 def test_idempotency(before_text: str) -> None:
     """Pipeline output must be identical on second run."""
     first_run = pipeline(before_text)
@@ -413,6 +488,7 @@ def test_idempotency(before_text: str) -> None:
 # Pattern for generating the golden file FROM the pipeline
 # (not hand-editing it)
 
+
 def regenerate_golden_file(before_path: Path, after_path: Path) -> None:
     """Generate golden file by running pipeline on before.toml."""
     before_text = before_path.read_text()
@@ -420,10 +496,13 @@ def regenerate_golden_file(before_path: Path, after_path: Path) -> None:
 
     # Verify idempotency before writing
     second = pipeline(result)
-    assert result == second, "Pipeline not idempotent -- cannot create stable golden file"
+    assert result == second, (
+        "Pipeline not idempotent -- cannot create stable golden file"
+    )
 
     # Verify no data loss
     import tomllib
+
     before_data = tomllib.loads(before_text)
     after_data = tomllib.loads(result)
     # ... verify key/value preservation ...
